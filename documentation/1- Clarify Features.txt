@@ -1,0 +1,96 @@
+1- Clarify Features
+Identifying and detailing the features of your OSV is foundational. Here’s how you can approach this:
+
+
+_____________________________________________________________________________________________________
+a. Core Features
+_____________________________________________________________________________________________________
+Interactive Organizational Map (100%)
+
+	- Hierarchical Visualization: Display departments, committees, and individual roles in a tree or network structure.
+	- Zoom and Pan: Allow users to navigate large structures easily.
+	- Collapsible Nodes: Enable users to expand or collapse sections for better readability.
+
+Solution: using 3D.JS library + OrgChart Repository from github.com/bumbeishvili 
+
+-----------------------------------------------------------------------------------------------------
+Search Functionality (15%)
+
+	- Search by Name, Role, or Department: Facilitate quick access to specific individuals or units.
+
+Solution: Make an upperButton to search by Name, Role, Department. 
+
+-----------------------------------------------------------------------------------------------------
+User Roles and Permissions (1%)
+
+	- Admin Access: For managing data, user roles, and system settings.
+	- Viewer Access: For general users to view the organizational structure without editing rights.
+
+Solution: Implementing User Roles and Permissions in Django involves leveraging its built-in authentication system, defining clear user groups, assigning appropriate permissions, and enforcing these permissions across your application’s views and APIs
+
+-----------------------------------------------------------------------------------------------------
+Data Integration and Automation (100%)
+
+	- Automated Data Extraction: Tools to regularly update the database from official sources.
+	- Manual Data Entry Interface: For cases where automated extraction isn’t feasible.
+
+Solution: We use an Excel file as the Manual Data Entry Interface because it is easy to use for the end users. For Automated Data Extraction, I use a Python script that iterates through the cells of the Excel file and then creates the hierarchical structure.
+
+-----------------------------------------------------------------------------------------------------
+Responsive Design (15%)
+
+	- Cross-Device Compatibility: Ensure the application works seamlessly on desktops, tablets, and smartphones.
+
+Solution: Bootstrap is the choice for implementing responsive design in the Organizational Structure Viewer (OSV) application.
+
+-----------------------------------------------------------------------------------------------------
+Export and Reporting Tools (5%)
+
+ 	- Data Export Options: Allow users to download data in formats like JPEG or PDF.
+
+Solution: Create an UpperButton whose functionality will export the department along with its parent nodes, align and center it on the reference page. This means you can print all the direct parents from the node, with an option to include or exclude only the siblings of the node. 
+
+-----------------------------------------------------------------------------------------------------
+Notifications and Alerts (0%)
+
+	- System Alerts: Notify admins about system issues or required maintenance.
+
+Solution: I am not going to implement this phase yet.
+
+_____________________________________________________________________________________________________
+b. Additional Features (Nice-to-Have)
+_____________________________________________________________________________________________________
+User Activity Logs (0%)
+
+	- Track and display user interactions within the application for transparency and accountability.
+
+Solution: I am not going to implement this phase yet.
+
+_____________________________________________________________________________________________________
+c. Prioritize Features
+_____________________________________________________________________________________________________
+
+Use a prioritization framework like MoSCoW  to categorize features based on their importance and urgency.
+(Must Have, Should Have, Could Have, Won’t Have)
+
+-Must Have:
+
+Interactive Organizational Map - 100%
+Search Functionality Button - 15%
+User Roles and Permissions - 0%
+Automated Data Extraction - 100%
+Export and Reporting Button - 5%
+Responsive Design - 15%
+
+-Should Have:
+
+
+
+-Could Have:
+
+User Activity Logs - 0%
+Notifications and Alerts - 0%
+
+-Won’t Have (Now):
+
+Multilingual Support 

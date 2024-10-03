@@ -1,0 +1,134 @@
+/* Global Styles */
+html, body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: Helvetica, sans-serif;
+}
+
+/* Tree Styles */
+#tree {
+  width: 100%;
+  height: 100%;
+}
+
+/* Highlight Styles */
+[data-l-id].highlight path, 
+[data-n-id].highlight rect, 
+[data-ctrl-ec-id].highlight circle {
+  stroke: #F57C00;
+  stroke-width: 3px;
+  position: relative;
+  z-index: 999;
+}
+
+/* Tooltip Styles */
+[data-tooltip]:focus:after,
+[data-tooltip]:focus:before {
+  display: none;
+  border-bottom-color: none !important;
+}
+
+[data-tooltip]:after {
+  height: auto !important;
+  padding: 11px !important;
+  content: attr(data-tooltip);
+  white-space: pre;
+  line-height: 16px !important;
+  text-align: left !important;
+}
+
+/* Action Buttons Styles */
+.action-buttons {
+  margin: 0 100px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.action-buttons button {
+  padding: 10px 15px;
+  border: none;
+  background-color: #007BFF;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-buttons button:hover {
+  background-color: #0056b3;
+}
+
+/* Node Content Styles */
+.node-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.node-content h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.node-content p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Node Image Styles */
+.node-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+/* Node Details */
+.node-details h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.node-details p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.node-details span {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Chart Container */
+.chart-container {
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+
+/* details button effects */
+.hoverable-button:hover .inner-circle {
+  fill: white; 
+  stroke: white;
+  transition: fill 0.3s ease, stroke 0.3s ease; 
+}
+
+.hoverable-button:hover .outer-rect {
+  fill: #6e6c6c;
+  stroke: #6e6c6c; 
+  transition: fill 0.3s ease, stroke 0.3s ease;
+}

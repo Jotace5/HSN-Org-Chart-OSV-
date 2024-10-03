@@ -1,0 +1,43 @@
+2- Stakeholder Consultation
+
+Engaging with stakeholders ensures that the application meets the actual needs and expectations of its users. Here’s how to effectively conduct stakeholder consultations:
+
+_____________________________________________________________________________________________________
+a. Identify Stakeholders
+_____________________________________________________________________________________________________
+
+Primary Stakeholders (100%) 
+
+	- Department of Organization and Administrative Systems Team: Directly involved in the project.
+
+	- National Congress Members: End-users who will utilize the OSV for various purposes.
+
+_____________________________________________________________________________________________________
+b. Prepare a Questionnaire:
+_____________________________________________________________________________________________________
+Purpose and Usage:
+
+	- What are the primary goals you want to achieve with the OSV?
+-We want a tool that allows us quick and visual access to the hierarchical structure of the Honorable Senado de la Nación Argentina. We have an Excel file with information about the structure.
+
+	- How frequently will you use the application?
+
+-We will use the app 2 or 3 times a day, mostly.
+
+-----------------------------------------------------------------------------------------------------
+Feature Preferences:
+
+	- Which features are most critical to your daily tasks?
+-Quick access to print or send visual information.
+
+	- Are there any specific functionalities you require that haven’t been mentioned?
+-No more than the functionalities discussed later.
+
+-----------------------------------------------------------------------------------------------------
+Pain Points:
+
+	- What challenges do you currently face with the existing system?
+It is slow to search each PDF file, and they are not always updated when needed.
+
+	- How can the OSV address these issues?
+Because it is an interactive tool that expands and collapses as needed.

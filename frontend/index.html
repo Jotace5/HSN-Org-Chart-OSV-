@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html> 
+    <head>
+        <meta charset="UTF-8" />
+        <title>Dosa-HSN_WebApp</title>
+        <link rel="shortcut icon" type="image/x-icon" href="misc/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+        <!-- Link to External CSS -->
+        <link rel="stylesheet" href="styles.css" />
+    
+        <!-- Simptip CSS for tooltips (if still using Simptip) -->
+        <link href="https://cdn.jsdelivr.net/npm/simptip@1.0.4/simptip.min.css" rel="stylesheet" />
+    
+        <!-- Font Awesome for icons -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+    </head>
+    
+
+<body>
+    <!----------------- NON-ESSENTIAL ORG CHART CONTENT ------------------>
+
+    <div class="action-buttons">
+        <!-- Action Buttons for Org Chart -->
+        <button
+            onclick='chart.setExpanded("103").render()'
+            class="simptip-position-bottom"
+            data-tooltip='chart.setExpanded("103") &#xa; .render()'
+        >
+            Expand #103
+        </button>
+        <button
+            onclick='chart.setExpanded("103", false).render()'
+            class="simptip-position-bottom"
+            data-tooltip='chart.setExpanded("103", false) &#xa; .render()'
+        >
+            Collapse #103
+        </button>
+        <button
+            onclick="chart.fit()"
+            class="simptip-position-bottom"
+            data-tooltip="chart.fit()"
+        >
+            Fit
+        </button>
+        
+        <button
+            onclick='chart.setCentered("134").render()'
+            class="simptip-position-bottom"
+            data-tooltip='chart.setCentered("134") &#xa; .render()'
+        >
+            Center
+        </button>
+        
+        <button
+            onclick='chart.setUpToTheRootHighlighted("134").render()'
+            class="simptip-position-bottom"
+            data-tooltip='chart.setUpToTheRootHighlighted("134") &#xa; .render()'
+        >
+            Highlight to root
+        </button>
+        <button
+            onclick="chart.clearHighlighting()"
+            class="simptip-position-bottom"
+            data-tooltip="chart.clearHighlighting() &#xa; .render()"
+        >
+            Clear Highlighting
+        </button>
+        <button
+            onclick="chart.fullscreen()"
+            class="simptip-position-bottom"
+            data-tooltip="chart.fullscreen()"
+        >
+            Full Screen
+        </button>
+        <button
+            onclick="chart.zoomIn()"
+            class="simptip-position-bottom"
+            data-tooltip="chart.zoomIn()"
+        >
+            Zoom In
+        </button>
+        <button
+            onclick="chart.zoomOut()"
+            class="simptip-position-bottom"
+            data-tooltip="chart.zoomOut()"
+        >
+            Zoom Out
+        </button>
+        <button
+            onclick="chart.expandAll()"
+            class="simptip-position-bottom"
+            data-tooltip="chart.expandAll()"
+        >
+            Expand All
+        </button>
+        <button
+            onclick="chart.collapseAll()"
+            class="simptip-position-bottom"
+            data-tooltip="chart.collapseAll()"
+        >
+            Collapse All
+        </button>
+        <button
+            onclick="downloadPdf()"
+            class="simptip-position-bottom"
+            data-tooltip="downloadPdf()"
+        >
+            Download PDF
+        </button>
+
+        <!-- PDF Download Script -->
+        <script>
+            function downloadPdf() {
+                chart.exportImg({
+                    save: false,
+                    onLoad: (base64) => {
+                        const { jsPDF } = window.jspdf;
+                        var pdf = new jsPDF();
+                        var img = new Image();
+                        img.src = base64;
+                        img.onload = function () {
+                            pdf.addImage(
+                                img,
+                                "JPEG",
+                                5,
+                                5,
+                                595 / 3,
+                                ((img.height / img.width) * 595) / 3
+                            );
+                            pdf.save("chart.pdf");
+                        };
+                    },
+                });
+            }            
+        </script>
+    </div>
+
+    <!----------------- ESSENTIAL ORG CHART CONTENT ------------------>
+
+    <!-- Load Libraries (Ensure each is loaded only once and in the correct order) -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script src="./build/d3-org-chart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.0.0/build/d3-flextree.js"></script>
+
+    
+    <!-- Chart Container -->
+    <div class="chart-container" style="padding-top: 10px; height: 1200px; background-color: white"></div>
+
+    <!-- Initialize Org Chart -->
+    <script>
+        var index = 0;
+        var chart;
+
+        d3.csv("database/test_data.csv")
+            .then((dataFlattened) => {
+                console.log("CSV Data Loaded:", dataFlattened); // For debugging
+
+                // Validate required fields
+                dataFlattened.forEach(d => {
+                    if (!d.id) {
+                        console.warn(`Row missing 'id':`, d);
+                    }
+                    if (d.parentId && !dataFlattened.some(parent => parent.id === d.parentId)) {
+                        console.warn(`Parent ID ${d.parentId} not found for node ID ${d.id}`);
+                    }
+                });
+
+                // Validate required fields
+                dataFlattened.forEach(d => {
+                    if (!d.id) {
+                        console.warn(`Row missing 'id':`, d);
+                    }
+                    if (d.parentId && !dataFlattened.some(parent => parent.id === d.parentId)) {
+                        console.warn(`Parent ID ${d.parentId} not found for node ID ${d.id}`);
+                    }
+                });
+
+                // Ensure only one root node
+                const roots = dataFlattened.filter(d => !d.parentId || d.parentId.trim() === "");
+                if (roots.length > 1) {
+                    throw new Error(`Multiple root nodes found: ${roots.map(r => r.id).join(", ")}`);
+                } else if (roots.length === 0) {
+                    throw new Error("No root node found. Ensure there is one node with an empty 'parentId'.");
+                }
+
+                // Initialize Org Chart
+                chart = new d3.OrgChart()
+                
+                    .container(".chart-container")
+                    .data(dataFlattened)
+                    .nodeHeight(d => 110)
+                    .nodeWidth(d => 222)
+                    .childrenMargin(d => 50)
+                    .compactMarginBetween(d => 35)
+                    .compactMarginPair(d => 30)
+                    //.connections[{from:'105', to:"106", label:"Coodinacion"}] // Sets connection data, array of objects, SAMPLE:  [{from:"145",to:"201",label:"Conflicts of interest"}]
+                    // .neighbourMargin((a, b) => 20) // Removed or commented out
+                    .onNodeClick(d => console.log(`Node clicked: ${d.id}`))
+                    .nodeContent(function(d, i, arr, state) {
+                        console.log("Rendering node:", d); // Debugging
+                    
+                        // Extract necessary data fields
+                        const id = d.data.id || 'No ID';
+                        const officename = d.data.officename || 'No Name';
+                        const official = d.data.official || 'N/A';
+                        const currentRegulations = d.data.currentRegulations || 'N/A';
+                        const collapsedChildrenCount = d.data._directSubordinates || 0; 
+                        const totalDependencies = d.data._totalSubordinates || 0;
+                        
+                    
+                        // Log to check if all the data exists as expected
+                        console.log('ID:', id, 'Officename:', officename, 'Official:', official, 'Collapsed Children Count:', collapsedChildrenCount);
+
+                        // Ensure SVG elements are returned inside an SVG wrapper
+                        return `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="230" height="120">
+                            <!-- Main node rectangle with rounded corners and gradient fill -->
+                            <defs>
+                                <linearGradient id="nodeGradient${id}" x1="0" y="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#1a237e" />
+                                    <stop offset="15%" stop-color="#1a237e" />
+                                    <stop offset="15%" stop-color="#e8eaf6" />
+                                    <stop offset="100%" stop-color="#e8eaf6" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="0" y="0" width="230" height="95" rx="15" ry="15" fill="url(#nodeGradient${id})" stroke="#ffffff" stroke-width="1"></rect>
+                            
+                            <!-- Replace {fields} with actual content -->
+                            <foreignObject x="10" y="15" width="200" height="80">
+                                <div xmlns="http://www.w3.org/1999/xhtml" class="fields" style="font-family: Arial, sans-serif; font-size: 12px;">
+                                    <h3 style="Center: 0; font-size: 14px; font-weight: bold;">${officename}</h3>
+                                    <p style="margin: 0;"><strong>Official:</strong> ${official}</p>
+                                </div>
+                            </foreignObject>
+
+                            <!-- Minus button -->
+                            <g class="hoverable-button" transform="translate(33, 110)"> 
+                                <circle class="outer-circle" cx="0" cy="0" r="9" fill="url(#buttonGradient)" stroke="#1a237e" stroke-width="1"></circle>
+                                <line x1="-6" y1="0" x2="6" y2="0" stroke-width="1.5" stroke="#1a237e"></line>
+                            </g>
+
+                            <!-- Details button -->
+                            <g class="hoverable-button" transform="translate(197, 110)"> 
+                                <!-- Larger outer circle -->
+                                <circle class="outer-circle" cx="0" cy="0" r="9" fill="url(#buttonGradient)" stroke="#1a237e" stroke-width="1"></circle>
+                                
+                                <!-- Smaller inner circles -->
+                                <circle class="inner-circle" cx="-5" cy="0" r="1" fill="#1a237e" stroke="#1a237e"></circle>
+                                <circle class="inner-circle" cx="0" cy="0" r="1" fill="#1a237e" stroke="#1a237e"></circle>
+                                <circle class="inner-circle" cx="5" cy="0" r="1" fill="#1a237e" stroke="#1a237e"></circle>
+                            </g>
+
+
+                            <!-- Dependencies button -->
+                            <g class="hoverable-button" transform="translate(113, 110)">
+                                <rect x="-25" y="-9" height="18" width="50" rx="9" ry="9" stroke-width="1" fill="url(#buttonGradient)" stroke="#1a237e"
+                                    filter="url(#shadow)"></rect>
+                                <text text-anchor="middle" style="font-size: 10px;cursor:pointer;" font-weight="bold" fill="#1a237e" x="0" y="4">👤 ${d.data._directSubordinates}</text>
+                            </g>
+                        </svg>
+                    `;                  
+                });                
+              // Render the chart
+                chart.render();
+            })
+            .catch((error) => {
+                console.error("Error loading CSV:", error);
+                alert("Failed to load data. Please check the console for more details.");
+            });
+    </script>
+
+    <!-- Additional Fonts (Optional) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
+        rel="stylesheet"
+    />
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        rel="stylesheet"
+    />
+</body>
+</html>
