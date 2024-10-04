@@ -1,0 +1,85 @@
+id,parentId,hierarchies,officename,official,currentRegulations
+100,,A,Senate of the Nation,,
+101,100,B,Presidency, President.,
+102,101,E,Citizen Services and Documentation Office,Person A,REG 001/20 - DOC 002/19 - REG 173/24
+103,102,F,Documentation Reception and Dispatch,Person B,REG 222/21
+104,102,F,Coordination and Social Management,Person C,REG 222/21 - REG 372/24
+105,101,D,Ceremonial and Protocol Coordination,Person D,DOC 0263/16
+106,101,C,General Ceremonial and Protocol Office,Person E,DOC 0263/16
+107,106,E,Ceremonial Office,Person F,DOC 0263/16
+108,107,F,Protocol Subdivision,,DOC 0263/16
+109,108,G,Audiences Department,,DOC 0263/16
+110,101,C,General Legal Affairs Office,Person G,DOC 1031/03
+111,110,D,Legal Affairs Subdivision,Person H,DOC 1031/03
+112,111,F,Legal and Technical Administrative Subdivision,Person I,DOC 0221/06 - REG 393/24
+113,112,G,Disciplinary Department,,DOC 0221/06
+114,111,E,Judicial Affairs Office,Person J,DOC 1031/03 - REG 807/24
+115,114,G,Legal Proceedings Department,,DOC 1031/03
+116,112,G,Contentious Department,,DOC 1031/03
+117,111,E,Legal Affairs Office,Person K,DOC 0086/19
+118,117,F,Legal Opinions Subdivision,,DOC 1031/03
+119,118,G,Contracts Department,,DOC 0086/19
+120,101,C,General Culture Office,Person L,DOC 0263/16 - DOC 12/24
+121,120,E,Honorary Cultural Consultants Body,,DOC 0263/16
+122,111,E,Culture Office,Person M,DOC 0263/16
+123,122,G,Entry Desk and Dispatch Department,,DOC 0263/16
+124,111,E,Parliamentary Museum Office,Person N,DOC 0263/16
+125,124,F,Museum Subdivision,,DOC 0263/16
+126,125,G,Museology and Research Department,,DOC 0263/16
+127,125,G,Conservation and Restoration Department,,DOC 0263/16
+128,101,C,Human Rights Observatory,Person O,DOC 0263/16
+129,101,C,General Audit and Control Office,,DOC 0370/99
+130,129,F,Secretary Subdivision,,DOC 0370/99
+131,130,G,Entry Desk Department,,DOC 0370/99
+132,129,D,General Audit and Control Subdivision,Person P,DOC 0370/99 - DOC 05/24
+133,132,E,Internal Audit and Quality Office,Person Q,REG 183/21 - REG 110/24
+134,133,F,Legal and Technical Subdivision,,DOC 0370/99
+135,134,G,Legal Audit Department,Person R,DOC 0370/99 - REG 930/24
+136,133,F,Economic and Financial Management Control Subdivision,,DOC 0370/99
+137,136,G,Operational Audit Department,,DOC 0370/99
+138,101,C,General International Relations Office,Person S,DOC 0402/16 - DOC 0263/16
+139,138,D,General International Relations Subdivision,Position Vacant,DOC 0263/16
+140,139,E,Latin America Relations Office,Position Vacant,DOC 0263/16
+141,139,E,Global Affairs Office,Person T,DOC 0402/16 - REG 391/24
+142,139,E,Bilateral Relations Office,Position Vacant,DOC 0263/16
+143,101,C,General Institutional Relations Office,Person U,DOC 0196/19 - DOC 0263/16 - DOC 02/24
+144,143,E,Transparency and Public Information Office,Person V,DOC 0567/16 - DOC 0263/16 - REG 415/24
+145,144,F,Transparency and Public Information Subdivision,Person W (Subdir),REG 0215/20 - REG 415/24
+146,139,E,Institutional Strengthening Office,Person X,DOC 0263/16
+147,146,G,Administrative Strengthening Department,,DOC 0263/16
+148,145,G,Technical Strengthening Department,Person Y,DOC 0263/16
+149,101,C,General Institutional Communication Office,Person Z,REG 185/21 - DOC 0373/17 - DOC 03/24
+150,149,G,Administrative Affairs Department,,DOC 0373/17
+151,149,D,General Institutional Communication Subdivision,Person AA,DOC 0373/17 - REG 509/24
+152,151,E,Institutional Communication Office,Person BB,DOC 0373/17
+153,152,F,Content, Press, and Diffusion Subdivision,Person CC,DOC 0373/17 - REG 605/24
+154,153,G,Content Department,,DOC 0373/17
+155,153,G,Design Department,,DOC 0373/17
+156,153,G,Photography Department,,DOC 0373/17
+157,153,G,Social Media Department,,REG 185/21
+158,152,F,Audio-Visual Communication Subdivision,,DOC 0373/17
+159,158,G,Television Department,,DOC 0373/17
+160,158,G,Audio-Visual Production Department,,DOC 0373/17
+161,152,F,Technical Image and Sound Subdivision,,DOC 0373/17
+162,161,G,Audio Department,,DOC 0373/17
+163,161,G,Audio and Video Networks Department,,DOC 0373/17
+164,100,B,Provisional Presidency,Person DD,
+165,164,C,General Parliamentary Relations Office,Person EE,DOC 0263/16
+166,165,D,General Liaison and Institutional Relations Subdivision,,DOC 0263/16
+167,166,E,Provincial Relations Office,Position Vacant,DOC 0263/16
+168,165,D,General Legislative Affairs Subdivision,Position Vacant,DOC 0263/16
+169,168,E,Administrative Office,Position Vacant,DOC 0263/16
+170,100,B,Administrative Secretariat,Person FF,
+171,170,F,Subdivision of the Secretariat,Person GG,DOC 0733/90 - REG 239/24
+172,171,G,Archive and Laws Department,Person HH,DOC 0733/90 - REG 168/24
+173,171,G,Entry and Exit Desk Department,Person II,DOC 0733/90 - REG 168/24
+174,170,C,General Security Office,Person JJ,REG 0198/20
+175,174,E,Security and Control Office,Person KK,DOC 0403/08 - DOC 0733/90 - REG 167/24
+176,175,G,Dispatch Department,,DOC 0403/08 - DOC 0733/90
+177,175,F,Security Subdivision,Person LL,DOC 0403/08 - DOC 0733/90 - REG 240/24
+178,177,G,Department A,,DOC 0403/08 - DOC 0733/90
+179,177,G,Department B,Person MM,DOC 0403/08 - DOC 0733/90 - REG 373/24
+180,177,G,Department C,Position Vacant,DOC 0403/08 - DOC 0733/90
+181,177,G,Department D,,DOC 0403/08 - DOC 0733/90
+182,177,G,Department E,,DOC 0403/08 - DOC 0733/90
+183,177,G,Department F,,DOC 0403/08 - DOC 0733/90

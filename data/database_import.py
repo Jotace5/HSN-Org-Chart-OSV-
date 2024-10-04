@@ -25,7 +25,7 @@ cursor.execute('''
 ''')
 
 # Open and read the CSV file
-with open('hsn-org-est(9-24).csv', newline='', encoding='utf-8') as csvfile:
+with open('test_data.csv', newline='', encoding='utf-8') as csvfile:
     csvreader = csv.DictReader(csvfile)
     
     for row in csvreader:
