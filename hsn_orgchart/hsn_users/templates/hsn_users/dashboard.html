@@ -6,6 +6,10 @@
 <body>
     <h2>Welcome to the Dashboard!</h2>
     <p>This page is only visible to logged-in users.</p>
-    <a href="{% url 'logout' %}">Logout</a>
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+    
 </body>
 </html>

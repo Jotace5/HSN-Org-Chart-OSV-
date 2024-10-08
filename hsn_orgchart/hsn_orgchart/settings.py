@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'hsn_users', # Hsn Django app 
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'hsn_orgchart.urls'
@@ -123,6 +125,51 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/'  # Redirect to home after login
+LOGIN_REDIRECT_URL = '/dashboard/'  # Redirect to the dashboard after login
 LOGOUT_REDIRECT_URL = '/'  # Redirect to home after logout
 LOGIN_URL = '/login/'  # Define the login URL
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+# Redirect all HTTP requests to HTTPS
+# For Local Development: If you're working locally and don't have HTTPS configured,
+# you can disable this setting by changing it to TRUE.
+SECURE_SSL_REDIRECT = False 
+
+# Ensure session cookies are only sent over HTTPS
+SESSION_COOKIE_SECURE = True
+
+# Ensure CSRF tokens are only sent over HTTPS
+CSRF_COOKIE_SECURE = True
+
+# Set a short session expiry time (e.g., 1 hour = 3600 seconds)
+SESSION_COOKIE_AGE = 3600
+
+# Optional: End the session when the user closes the browser
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Axes settings to limit failed login attempts
+AXES_FAILURE_LIMIT = 5  # Number of allowed failed login attempts
+AXES_COOLOFF_TIME = 0.25  # Time (in hours) to lock the user out after exceeding failed attempts
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',  # Add this for django-axes
+    'django.contrib.auth.backends.ModelBackend',  # Default Django auth backend
+]
