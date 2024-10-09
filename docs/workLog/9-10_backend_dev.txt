@@ -1,0 +1,28 @@
+9/10
+
+Implementation Plan:
+-----------------------------------------------------------------------------
+1. Set Up User Roles:
+   a) Create a custom user model (optional, only if needed).
+   b) Define admin and viewer roles using Django’s groups or permissions.
+   c) Assign permissions to each role.
+
+-----------------------------------------------------------------------------
+2. Implement Session Expiration:
+   a) Set session expiration for all users in settings.py.
+   b) Customize session expiration time for viewer users.
+
+-----------------------------------------------------------------------------
+3. Define User Actions:
+   a) Restrict viewers to read-only access.
+   b) Define admin-specific actions (e.g., editing or adding data).
+
+-----------------------------------------------------------------------------
+4. Add Popup Logout Message:
+   a) Create a JavaScript-based popup for logout confirmation.
+   b) Display a Django success message upon logout.
+
+-----------------------------------------------------------------------------
+5. Test Permissions:
+   a) Test session expiration for both user roles.
+   b) Test role-specific actions (viewers vs admins).

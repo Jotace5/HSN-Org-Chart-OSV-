@@ -17,27 +17,26 @@ b. Prepare a Questionnaire:
 _____________________________________________________________________________________________________
 Purpose and Usage:
 
-	- What are the primary goals you want to achieve with the OSV?
--We want a tool that allows us quick and visual access to the hierarchical structure of the Honorable Senado de la Nación Argentina. We have an Excel file with information about the structure.
+	Q: What are the primary goals you want to achieve with the OSV?
+A: We want a tool that allows us quick and visual access to the hierarchical structure of the Honorable Senado de la Nación Argentina. We have an Excel file with information about the structure.
 
-	- How frequently will you use the application?
-
--We will use the app 2 or 3 times a day, mostly.
+	Q: How frequently will you use the application?
+A: We will use the app 2 or 3 times a day, mostly.
 
 -----------------------------------------------------------------------------------------------------
 Feature Preferences:
 
-	- Which features are most critical to your daily tasks?
--Quick access to print or send visual information.
+	Q: Which features are most critical to your daily tasks?
+A: Quick access to print or send visual information.
 
-	- Are there any specific functionalities you require that haven’t been mentioned?
--No more than the functionalities discussed later.
+	Q: Are there any specific functionalities you require that haven’t been mentioned?
+A: No more than the functionalities discussed later.
 
 -----------------------------------------------------------------------------------------------------
 Pain Points:
 
-	- What challenges do you currently face with the existing system?
-It is slow to search each PDF file, and they are not always updated when needed.
+	Q: What challenges do you currently face with the existing system?
+A: It is slow to search each PDF file, and they are not always updated when needed.
 
-	- How can the OSV address these issues?
-Because it is an interactive tool that expands and collapses as needed.
+	Q: How can the OSV address these issues?
+A: Because it is an interactive tool that expands and collapses as needed.

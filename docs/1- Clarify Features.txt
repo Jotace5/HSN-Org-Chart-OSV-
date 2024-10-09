@@ -84,11 +84,10 @@ Responsive Design - 15%
 
 -Should Have:
 
-
+User Activity Logs - 0%
 
 -Could Have:
 
-User Activity Logs - 0%
 Notifications and Alerts - 0%
 
 -Won’t Have (Now):
