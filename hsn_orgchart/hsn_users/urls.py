@@ -7,6 +7,10 @@ urlpatterns = [
     path('login/', views.custom_login_view, name='login'),  # Custom login page
     path('logout/', views.logout_view, name='logout'),  # Custom logout view
     path('dashboard/', views.dashboard, name='dashboard'),  # Restricted page
+    path('admin-view/', views.admin_view, name='admin_view'),  # Admin-only page
+    path('viewer-view/', views.viewer_view, name='viewer_view'),  # Viewer-only page
+    path('upload_excel/', views.upload_excel, name='upload_excel'),
+    path('chart_data/', views.get_chart_data, name='chart_data'), 
     
     # Password reset views
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),

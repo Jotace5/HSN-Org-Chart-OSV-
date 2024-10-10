@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'axes.middleware.AxesMiddleware',
+    'hsn_users.middleware.CustomSessionExpiryMiddleware',
 ]
 
 ROOT_URLCONF = 'hsn_orgchart.urls'
@@ -160,7 +161,7 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Set a short session expiry time (e.g., 1 hour = 3600 seconds)
-SESSION_COOKIE_AGE = 3600
+SESSION_COOKIE_AGE = 3600 # 3600 seconds = 1 hour
 
 # Optional: End the session when the user closes the browser
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

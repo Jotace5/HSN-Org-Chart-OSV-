@@ -1,0 +1,75 @@
+
+
+Implementation Plan:
+
+-----------------------------------------------------------------------------
+9/10
+1. Set Up User Roles:
+   a) Create a custom user model (optional, only if needed).
+   b) Define admin and viewer roles using Django’s groups or permissions.
+   c) Assign permissions to each role.
+
+-----------------------------------------------------------------------------
+10/10
+2. Implement Session Expiration:
+   a) Set session expiration for all users in settings.py.
+   b) Customize session expiration time for viewer users.
+
+-----------------------------------------------------------------------------
+3. Define User Actions:
+   a) Define admin-specific actions (Implement Admin-Only File Upload Feature).
+
+-----------------------------------------------------------------------------
+14/10
+4. Backend: Ensure Data Processing and Storage
+   a) Ensure the uploaded Excel file is correctly processed and saved into the database.
+   b) Confirm all data fields are accurately mapped from Excel to your database model.
+
+-----------------------------------------------------------------------------
+5. Create an API Endpoint for Chart Data
+   a) Implement an API endpoint that serves the data in JSON format for D3.js to render the organizational chart.
+   b) Use Django's `JsonResponse` to provide a response containing the latest database data.
+
+-----------------------------------------------------------------------------
+6. Update the D3.js Script
+   a) Update the JavaScript in `admin_dashboard.html` to make an AJAX call to the API endpoint and fetch the updated chart data.
+   b) Ensure the chart is updated every time the page loads or refreshes.
+
+-----------------------------------------------------------------------------
+7. Add Popup Logout Message
+   a) Create a JavaScript-based Popup for Logout Confirmation:
+     - Implement a modal that asks users to confirm before logging out.
+   b) Display a Django Success Message upon Logout:
+     - Use Django's messaging framework to display a success message after a user logs out.
+
+-----------------------------------------------------------------------------
+8. Test Permissions
+   a) Test Session Expiration for Both User Roles
+     - Ensure session timeouts work as expected for both viewers and admins.
+   b) Test Role-Specific Actions (Viewers vs Admins):
+     - Ensure that viewers can only view the chart while admins can upload and modify data.
+
+-----------------------------------------------------------------------------
+9. User Interface Improvements
+   a) Loading Indicator Add a loading indicator to the popup modal while the Excel file is being processed.
+   b) Success/Error Messages Display feedback after the file is successfully uploaded and processed, or if an error occurs.
+
+-----------------------------------------------------------------------------
+10. Access Control and User Testing
+   a) Viewer Role Ensure viewer users can see the rendered chart but don’t have access to upload or change data.
+   b) Session Expiry Testing Confirm that session expiration works properly for both viewers and admins.
+
+-----------------------------------------------------------------------------
+11. Code Cleanup and Optimization
+   a) Error Handling Add proper error handling in the views to manage invalid files, missing fields, etc.
+   b) Code Review Review all code for security best practices, particularly around file uploads (e.g., allowed file types).
+
+-----------------------------------------------------------------------------
+12. Final Testing
+   a) Test All Features: Ensure file uploads, data processing, chart rendering, and different user access levels work as expected.
+   b) Test Edge Cases Test for scenarios like large Excel files, incorrect file formats, etc.
+
+-----------------------------------------------------------------------------
+13. Deployment Preparation (if applicable)
+   a) Prepare for Deployment: Prepare your project for deployment in a production environment.
+   b) Deployment Settings: Configure settings such as `DEBUG=False`, secure database credentials, and set up a web server (e.g., Nginx).

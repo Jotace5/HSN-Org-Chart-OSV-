@@ -1,0 +1,168 @@
+<!-- admin_dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Senado de la Nación Argentina</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .header {
+            background-color: #2a3d75;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            margin: 40px auto;
+            width: 90%;
+            max-width: 1200px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .dashboard-heading {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            background-color: #2a3d75;
+            color: white;
+            padding: 15px 25px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            margin: 10px;
+        }
+
+        .button:hover {
+            background-color: #1d2c5a;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Senado de la Nación Argentina</h1>
+        <h2>Direccion de Organizacion y Sistemas Administrativos</h2>
+        <p>Admin Dashboard</p>
+    </div>
+    <div class="container">
+        <h2 class="dashboard-heading">Admin Actions</h2>
+        <div class="action-buttons">
+            <a href="#" class="button" id="loadDatabaseButton">Load database</a>
+        </div>
+    </div>
+
+    <!-- Modal for File Upload -->
+    <div id="fileUploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h3>Upload an Excel File</h3>
+            <form method="post" enctype="multipart/form-data" action="{% url 'upload_excel' %}">
+                {% csrf_token %}
+                <label for="file">Select an Excel file:</label>
+                <input type="file" id="file" name="file" accept=".xlsx, .xls" required>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+    </div>
+
+    <hr>
+    <h3>Organization Chart</h3>
+    <div id="chart">CHART</div>
+
+    <!-- Include D3.js script -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        // JavaScript to handle modal display
+        var modal = document.getElementById("fileUploadModal");
+        var btn = document.getElementById("loadDatabaseButton");
+        var span = document.getElementById("closeModal");
+
+        // Open the modal when the button is clicked
+        btn.onclick = function () {
+            modal.style.display = "block";
+        }
+
+        // Close the modal when the 'X' is clicked
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // Close the modal if user clicks outside of it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Your existing D3.js code to render the organizational chart
+        d3.json("{% url 'chart_data' %}").then(function (data) {
+            // Render the chart here
+            console.log(data); // Replace this with your D3.js code to visualize the data
+        }).catch(function (error) {
+            console.error('Error loading data:', error);
+        });
+    </script>
+
+</body>
+</html>

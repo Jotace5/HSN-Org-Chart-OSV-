@@ -1,0 +1,27 @@
+### HTML Pages Guide for the Application
+
+#### home.html
+
+**Purpose**: This page acts as a landing page for unauthenticated users or a public information page about the application. It should provide a welcoming introduction and key details about the "Senado de la Nación Argentina" app, including features, purpose, and how to use the app.
+
+**Use Case**: When a user visits the base URL (`/`), they should see this page. It can also include links to the login page or other public sections that are accessible without authentication.
+
+#### login.html
+
+**Purpose**: This is the login page where users can authenticate. It should have fields for entering credentials (username and password) and may include options for resetting a forgotten password or a link to sign up if applicable.
+
+**Use Case**: Users are directed here when they need to log in. The login page should be secure, well-styled, and easy to navigate.
+
+#### admin_dashboard.html & viewer_dashboard.html
+
+**admin_dashboard.html**:
+
+**Purpose**: This page is used by the `admin_view` function and is accessible only to users in the Admin group. It contains all administrative functionalities such as managing users, editing organizational data, and system settings. The design should be minimalistic but effective, providing all tools needed for administrators to manage the application.
+
+**Use Case**: This page is rendered after an admin logs in and navigates to the dashboard. Admin users have access to all features of the application, such as managing data and viewing analytics.
+
+**viewer_dashboard.html**:
+
+**Purpose**: This page is used by the `viewer_view` function and is accessible only to users in the Viewer group. It provides an overview of the organizational structure, and data, and allows for report viewing. This dashboard does not allow editing; it’s focused on presenting information clearly and simply.
+
+**Use Case**: When a Viewer logs in, they are directed to this page where they can navigate and explore the content available to them.
