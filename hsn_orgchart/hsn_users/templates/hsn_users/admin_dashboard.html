@@ -96,6 +96,20 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        .messages {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .messages.success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .messages.error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
     </style>
 </head>
 
@@ -106,6 +120,15 @@
         <p>Admin Dashboard</p>
     </div>
     <div class="container">
+        <!-- Display Messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="messages {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
         <h2 class="dashboard-heading">Admin Actions</h2>
         <div class="action-buttons">
             <a href="#" class="button" id="loadDatabaseButton">Load database</a>
