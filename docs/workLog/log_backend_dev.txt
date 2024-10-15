@@ -28,10 +28,11 @@ Implementation Plan:
    b) Confirm all data fields are accurately mapped from Excel to your database model. 
 
 -----------------------------------------------------------------------------
+16/10
 5. Add New Features
    a) Automatically delete the XLS files used to upload data to the database (after X time).
    b) Register new users through email requests.
-   c) Delete data and restore the database to a previous point.
+   c) Delete data and restore the database to a previous point."
 
 -----------------------------------------------------------------------------
 6. Create an API Endpoint for Chart Data (!To check)
