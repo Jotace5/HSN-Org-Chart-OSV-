@@ -111,42 +111,43 @@ def upload_excel(request):
                 # Use the appropriate method for reading the Excel file
                 if file_extension == '.xls':
                     # Load .xls file using pyexcel
-                    sheet = p.get_sheet(file_name=file_path)
-                    df = pd.DataFrame(sheet.to_array()[1:], columns=sheet.to_array()[0])  # Convert to DataFrame, excluding header row
+                    df = pd.read_excel(file_path, engine='xlrd')
                 elif file_extension == '.xlsx':
                     # Load .xlsx file using Pandas with openpyxl
                     df = pd.read_excel(file_path, engine='openpyxl')
                 else:
                     raise ValueError("Unsupported file type. Please upload an .xls or .xlsx file.")
 
-                # Iterate through rows and save them directly to the database
+                # Define ID counter and parentId logic
                 id_counter = 100  # Start ID from 100
-                last_id_per_column = {}
-                last_column_index = -1
+                last_id_per_column = {}  # Dictionary to store the last used ID for each column index
+                last_column_index = -1  # Initialize with a value less than any valid column index
 
+                # Iterate over each row, adapting the CSV logic to save to the database
                 for row_index in range(len(df)):
-                    parentId = None
+                    parentId = None  # Reset parentId for each row
 
-                    # Go column by column, from H to A
-                    for col_index in range(7, -1, -1):
+                    # Go column by column, from H (last column) to A (first column)
+                    for col_index in range(7, -1, -1):  # 7 = column H, 0 = column A
                         value = df.iloc[row_index, col_index]
 
-                        if pd.notna(value):
-                            officename = value.replace('"', '').replace(',', ' ')
-                            official = df.iloc[row_index, 8] if pd.notna(df.iloc[row_index, 8]) else None
-                            currentRegulations = df.iloc[row_index, 9] if pd.notna(df.iloc[row_index, 9]) else None
+                        if pd.notna(value):  # If there's a value in the current cell
+                            officename = value.replace('"', '').replace(',', ' ')  # Clean the officename
+                            official = df.iloc[row_index, 8] if pd.notna(df.iloc[row_index, 8]) else None  # Column I
+                            currentRegulations = df.iloc[row_index, 9] if pd.notna(df.iloc[row_index, 9]) else None  # Column J
 
-                            # Determine parentId
+                            # Determine parentId based on column index comparison
                             if col_index > last_column_index:
                                 parentId = last_id_per_column.get(last_column_index, None)
-
+                            
                             elif col_index == last_column_index:
+                                # If column index is equal, search for parentId from a previous column
                                 for check_index in range(col_index - 1, -1, -1):
                                     if check_index in last_id_per_column:
                                         parentId = last_id_per_column[check_index]
                                         break
-
                             elif col_index < last_column_index:
+                                # If column index is smaller, look backward for a column index that is smaller
                                 for check_index in range(col_index - 1, -1, -1):
                                     if check_index in last_id_per_column:
                                         parentId = last_id_per_column[check_index]
@@ -157,19 +158,13 @@ def upload_excel(request):
                                 id=id_counter,
                                 defaults={
                                     'parentId': parentId,
-                                    'hierarchies': chr(col_index + 65),
+                                    'hierarchies': chr(col_index + 65),  # Convert column index to corresponding letter (A, B, C, ...)
                                     'officename': officename,
                                     'currentRegulations': currentRegulations
                                 }
                             )
 
-                            # Update the last ID used for this column
-                            last_id_per_column[col_index] = id_counter
-
-                            # Update last_column_index to the current column index
-                            last_column_index = col_index
-
-                            # Insert data into dataOfficial table if necessary (assuming official name is in the Excel file)
+                            # Insert data into dataOfficial table if necessary
                             if official:
                                 dataOfficial.objects.update_or_create(
                                     office=office,
@@ -178,9 +173,18 @@ def upload_excel(request):
                                     }
                                 )
 
+                            # Update the last ID used for this column
+                            last_id_per_column[col_index] = id_counter
+
+                            # Update last_column_index to the current column index
+                            last_column_index = col_index
+
                             # Increment the ID counter
                             id_counter += 1
                             rows_processed += 1
+
+                            # Break after processing the deepest level
+                            break
 
             except Exception as e:
                 status = 'FAILED'
@@ -195,17 +199,18 @@ def upload_excel(request):
                 status=status,
                 error_message=error_message
             )
-            
+
             # Add success message
             if status == 'SUCCESS':
                 messages.success(request, f'Successfully uploaded {rows_processed} rows from {uploaded_file.name}')
             else:
                 messages.error(request, f'Failed to upload {uploaded_file.name}: {error_message}')
-                
+
             # Redirect to the admin dashboard after processing
             return redirect('dashboard')
 
     return render(request, 'hsn_users/admin_dashboard.html')
+
 
 def get_chart_data(request):
     # Query data from the database and convert it into a JSON format
