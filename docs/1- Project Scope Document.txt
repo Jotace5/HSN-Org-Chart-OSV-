@@ -1,0 +1,62 @@
+## Project Scope Document
+
+### 1. Project Information
+- **Project Title**: Organizational Structure Viewer (OSV) for the Argentine National Congress
+- **Project Sponsor**: Direction of Organizational and Administrative Systems
+- **Project Manager**: Juan Manuel Castaño Pailos, Direction of Organizational and Administrative Systems
+- **Date**: October 1, 2024
+
+### 2. Purpose and Justification
+- **Purpose**: The Organizational Structure Viewer (OSV) is an interactive web application designed to visually map and display the organizational structure of the Argentine National Congress. It aims to enhance transparency, accessibility, and efficiency in managing and viewing organizational data.
+- **Justification**: Currently, the organizational structure data is manually managed or dispersed across various systems, leading to inefficiencies and potential inaccuracies. The OSV will streamline data management through automation, provide an intuitive user interface for easy navigation, and ensure that stakeholders have real-time access to up-to-date information. This will facilitate better decision-making, improve transparency, and reduce the administrative burden on staff.
+
+### 3. Project Objectives
+- **Develop an Interactive Organizational Map**: Create a hierarchical and network visualization of departments, committees, and individual roles within the National Congress by March 31, 2025.
+- **Implement Robust Search Functionality**: Enable users to search by name, role, or department with advanced filtering options by March 31, 2025.
+- **Automate Data Extraction Processes**: Develop and deploy automated tools to regularly update the organizational database from official sources by March 31, 2025.
+
+### 4. Scope Description
+#### 4.1 Inclusions
+- **Core Functionalities**:
+  - Interactive Organizational Map: Hierarchical visualization of departments, committees, and roles.
+  - Comprehensive Search Functionality: Advanced filters for searching by name, role, or department.
+  - User Roles and Permissions Management: Admin and Viewer access levels.
+  - Automated Data Extraction and ETL Processes: Tools to extract, transform, and load data from official sources into the database.
+  - Responsive Design: Compatibility with desktops, tablets, and smartphones.
+  - Export and Reporting Tools: Data export in formats like JPEG, PDF, and Excel.
+
+#### 4.2 Exclusions
+- **Out of Scope**:
+  - Integration with external systems not currently in use by the National Congress.
+  - Development of mobile-specific applications beyond responsive web design.
+  - Multilingual support unless specified in future phases.
+
+### 5. Deliverables
+1. **Web Application**: Fully functional OSV with interactive maps, search functionality, and user roles.
+2. **API**: Developed and documented API for front-end and back-end communication.
+3. **Automated Data Extraction Tools**: Scripts and tools for ETL processes to maintain the database.
+4. **Documentation**: User guides, technical documentation, and training materials.
+5. **Deployment**: Deployed application on the chosen hosting platform with staging and production environments.
+6. **Training Sessions**: Conducted training sessions for all user roles.
+
+### 6. Stakeholders
+- **Primary Stakeholders**:
+  - Department of Organization and Administrative Systems Team: Project team responsible for development and management.
+  - National Congress Members: End-users who will utilize the OSV.
+  - Administrative Staff: Individuals responsible for data maintenance and updates.
+
+### 7. Assumptions
+- **Data Availability**: All necessary organizational data will be available and accessible for extraction and integration.
+- **Stakeholder Engagement**: Stakeholders will be available and cooperative in providing feedback and participating in consultations.
+- **Resource Availability**: Adequate technical resources (developers, designers, testers) will be available throughout the project lifecycle.
+
+### 8. Constraints
+- **Time**: The project must be completed within a six-month timeframe, concluding by March 31, 2025.
+- **Technical Limitations**: Potential limitations in integrating with existing systems or handling large datasets efficiently.
+
+### 9. Success Criteria
+- **User Adoption**: At least 80% of intended users actively using the OSV within six months post-deployment.
+- **Performance**: Average page load times below 2 seconds and 99.9% system uptime.
+- **User Satisfaction**: Achieve an average user satisfaction score of 4 out of 5 in post-deployment surveys.
+- **Data Accuracy**: Maintain a data accuracy rate of 99% through automated extraction and regular updates.
+

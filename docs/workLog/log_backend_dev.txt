@@ -34,7 +34,7 @@ Implementation Plan:
    c) Delete data and restore the database to a previous point.
 
 -----------------------------------------------------------------------------
-6. Create an API Endpoint for Chart Data
+6. Create an API Endpoint for Chart Data (!To check)
    a) Implement an API endpoint that serves the data in JSON format for D3.js to render the organizational chart.
    b) Use Django's `JsonResponse` to provide a response containing the latest database data.
 
