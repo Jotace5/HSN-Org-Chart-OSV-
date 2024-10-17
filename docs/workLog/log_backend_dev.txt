@@ -29,10 +29,25 @@ Implementation Plan:
 
 -----------------------------------------------------------------------------
 16/10
-5. Add New Features
-   a) Automatically delete the XLS files used to upload data to the database (after X time).
-   b) Register new users through email requests.
-   c) Delete data and restore the database to a previous point."
+-----------------------------------------------------------------------------
+17/10
+5. Back-end Features
+   -In Development:
+      !) Modify the LOAD DATABASE logic to use a new implementation CHECK DATA
+         1) [Admin][Animation]            Show time to load data / Animation of loading
+         2) [Admin]                       Automatically delete the XLS files used to upload data to the database.
+         3) [Admin][Animation]            Msj Advice: Data loaded (Excel files)
+         4) [Admin][Option Button]        Show the differences between the last database with the new. Comparing only the hierarchies, and office names.
+
+   -For Development:
+      a) [Home page]                   Register new users through email requests. 
+      b) [Admin][Option Button]        Delete last upload data and restore the database to a previous state.
+      c) [Both Users][Option Button]   Log Out Button
+      d) [Admin][Animation]            Show time to load data / Animation of loading 
+      e) [Both Users][Option Button]   Enable users to search by name, role, or department with advanced filtering options.
+      f) [Both Users][Option Button]   Export and Reporting Tools: Data export in formats like JPEG, PDF.
+      g) [Both Users][Options Menu]    Lateral Menu for each department with essencial data.
+
 
 -----------------------------------------------------------------------------
 6. Create an API Endpoint for Chart Data (!To check)
@@ -52,11 +67,8 @@ Implementation Plan:
      - Use Django's messaging framework to display a success message after a user logs out.
 
 -----------------------------------------------------------------------------
-9. Test Permissions
-   a) Test Session Expiration for Both User Roles
-     - Ensure session timeouts work as expected for both viewers and admins.
-   b) Test Role-Specific Actions (Viewers vs Admins):
-     - Ensure that viewers can only view the chart while admins can upload and modify data.
+9. Front-End Implementations
+   a) [Both Users] Compatibility with desktops, tablets, and smartphones.
 
 -----------------------------------------------------------------------------
 10. User Interface Improvements
@@ -64,9 +76,11 @@ Implementation Plan:
    b) Success/Error Messages Display feedback after the file is successfully uploaded and processed, or if an error occurs.
 
 -----------------------------------------------------------------------------
-11. Access Control and User Testing
-   a) Viewer Role Ensure viewer users can see the rendered chart but don’t have access to upload or change data.
-   b) Session Expiry Testing Confirm that session expiration works properly for both viewers and admins.
+11. Test Permissions
+   a) Test Session Expiration for Both User Roles
+     - Ensure session timeouts work as expected for both viewers and admins.
+   b) Test Role-Specific Actions (Viewers vs Admins):
+     - Ensure that viewers can only view the chart while admins can upload and modify data.
 
 -----------------------------------------------------------------------------
 12. Code Cleanup and Optimization

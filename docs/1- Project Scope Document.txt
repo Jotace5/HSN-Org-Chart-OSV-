@@ -12,8 +12,8 @@
 
 ### 3. Project Objectives
 - **Develop an Interactive Organizational Map**: Create a hierarchical and network visualization of departments, committees, and individual roles within the National Congress by March 31, 2025.
-- **Implement Robust Search Functionality**: Enable users to search by name, role, or department with advanced filtering options by March 31, 2025.
-- **Automate Data Extraction Processes**: Develop and deploy automated tools to regularly update the organizational database from official sources by March 31, 2025.
+- **Implement Robust Search Functionality**: Enable users to search by name, role, or department with advanced filtering options by December 15, 2024.
+- **Automate Data Extraction Processes**: Develop and deploy automated tools to regularly update the organizational database from official sources by December 15, 2024.
 
 ### 4. Scope Description
 #### 4.1 Inclusions
