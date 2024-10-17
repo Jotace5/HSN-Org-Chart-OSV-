@@ -211,8 +211,3 @@ def upload_excel(request):
 
     return render(request, 'hsn_users/admin_dashboard.html')
 
-
-def get_chart_data(request):
-    # Query data from the database and convert it into a JSON format
-    data = list(YourModel.objects.values())
-    return JsonResponse(data, safe=False)

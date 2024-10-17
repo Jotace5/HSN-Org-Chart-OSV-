@@ -24,16 +24,22 @@ Implementation Plan:
 4. Backend: Ensure Data Processing and Storage
    a) Ensure the uploaded Excel file is correctly processed and saved into the database.
 
-15/10
-   b) Confirm all data fields are accurately mapped from Excel to your database model. 
-
------------------------------------------------------------------------------
-16/10
------------------------------------------------------------------------------
 17/10
+   b) Confirm all data fields are accurately mapped from Excel to your database model. 
+         Testing & Verification:
+            -Verify Data Integrity
+                  Test the upload functionality thoroughly with various Excel files.
+                  Verify the database entries to ensure the hierarchy and office names are stored correctly.
+            -UI Verification:
+                  Check that success and error messages are displayed properly after uploading.
+
+18/10
 5. Back-end Features
    -In Development:
-      !) Modify the LOAD DATABASE logic to use a new implementation CHECK DATA
+      !) LOAD DATABASE logic adds a layer of validation to prevent unintended changes.
+            -Pre-upload Comparison Step
+            -User Decision Interface
+            
          1) [Admin][Animation]            Show time to load data / Animation of loading
          2) [Admin]                       Automatically delete the XLS files used to upload data to the database.
          3) [Admin][Animation]            Msj Advice: Data loaded (Excel files)
