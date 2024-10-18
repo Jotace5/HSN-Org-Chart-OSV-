@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
  
- 
  // Get the modal
  var modal = document.getElementById("fileUploadModal");
  // Get the button that opens the modal

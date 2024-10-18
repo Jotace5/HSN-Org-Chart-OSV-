@@ -11,6 +11,7 @@ urlpatterns = [
     path('viewer-view/', views.viewer_view, name='viewer_view'),  # Viewer-only page
     path('upload_excel/', views.upload_excel, name='upload_excel'),
     path('chart_data/', views.get_chart_data, name='chart_data'),
+    path('approve-update/', views.approve_update, name='approve_update'),
     
     # Password reset views
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
