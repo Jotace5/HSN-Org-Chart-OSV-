@@ -12,7 +12,8 @@ import pandas as pd
 from django.http import JsonResponse
 from .models import models, DataUploadLog, dataOffice, dataOfficial
 from django.utils import timezone
-import pyexcel as p  
+from django.http import JsonResponse # For Get_chart_data function (NOT WORKIN YET)
+ 
 
 # Create your views here.
 def home(request):
@@ -211,3 +212,16 @@ def upload_excel(request):
 
     return render(request, 'hsn_users/admin_dashboard.html')
 
+
+def get_chart_data(request):
+    # Example data structure for the organizational chart
+    data = {
+        "nodes": [
+            {"id": 1, "name": "Department A", "parentId": None},
+            {"id": 2, "name": "Department B", "parentId": 1},
+            {"id": 3, "name": "Department C", "parentId": 1},
+            {"id": 4, "name": "Department D", "parentId": 2},
+        ]
+    }
+    
+    return JsonResponse(data)

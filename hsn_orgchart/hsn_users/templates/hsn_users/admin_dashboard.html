@@ -1,5 +1,9 @@
 <!-- admin_dashboard.html -->
 <!DOCTYPE html>
+
+<!-- Load static template tag for local CSS -->
+{% load static %}
+
 <html lang="en">
 
 <head>
@@ -10,144 +14,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <!--Actualizar esto para que sea leido desde un archivo CSS y nos desde el HTML-->
-    <style> 
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-
-        .header {
-            background-color: #2a3d75;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .container {
-            margin: 40px auto;
-            width: 90%;
-            max-width: 1200px;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .dashboard-heading {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 30px;
-        }
-
-        .action-buttons {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-
-        .button {
-            background-color: #2a3d75;
-            color: white;
-            padding: 15px 25px;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-            margin: 10px;
-        }
-
-        .button:hover {
-            background-color: #1d2c5a;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-            padding-top: 60px;;
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 8px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .messages-container {
-            display: flex;
-            justify-content: center; /* Centers horizontally */
-            align-items: center;     /* Centers vertically */
-            text-align: center;      /* Ensures the text is centered */
-            margin: 20px 0;          /* Adds some space around the messages */
-        }
-        .messages.success {
-            background-color: #dff0d8;
-            color: #3c763d;
-        }
-        .messages.error {
-            background-color: #f2dede;
-            color: #a94442;
-        }
-
-        .alert {
-            padding: 10px 20px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            background-color: #d4edda;  /* Default to success color */
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            border-radius: 20px;
-        }
-
-        .alert.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            border-radius: 20px;
-        }
-
-        .alert .icon {
-            margin-right: 10px;
-            font-size: 1.5em;
-        }        
-    </style>
+    
+    <!-- Local CSS file with static tag -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin_styles.css' %}">   
 </head>
 
 <body>
@@ -156,6 +25,13 @@
         <h2>Direccion de Organizacion y Sistemas Administrativos</h2>
         <p>Admin Dashboard</p>
         </div>
+
+         <!-- Loading Spinner (Initially Hidden) -->
+        <div id="loading-spinner" style="display: none;">
+            <img src="{% static 'images/spinner.gif' %}" alt="Loading..." />
+        </div>
+
+
         <!-- Display Messages (Success/Error) -->
         {% if messages %}
         <div class="messages-container">
@@ -195,48 +71,20 @@
     <hr>
     <h3>Organization Chart</h3>
     <div id="chart">CHART</div>
-
     <!-- Include D3.js script -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- Font Awesome script (optional) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
-
-    <!-- Add JavaScript to control modal functionality -->
+    <!-- Link to external JavaScript file -->
+    <script src="{% static 'js/admin_dashboard.js' %}"></script>
+    
+    
+    
+    <!--NOT WORKING YET-->
     <script>
-        // Get the modal
-        var modal = document.getElementById("fileUploadModal");
-
-        // Get the button that opens the modal
-        var btn = document.getElementById("loadDatabaseButton");
-
-        // Get the <span> element that closes the modal
-        var span = document.getElementById("closeModal");
-
-        // When the user clicks the button, open the modal 
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-
-        // When the user clicks on <span> (x), close the modal
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        // Your existing D3.js code to render the organizational chart
-        d3.json("{% url 'chart_data' %}").then(function (data) {
-            // Render the chart here
-            console.log(data); // Replace this with your D3.js code to visualize the data
-        }).catch(function (error) {
-            console.error('Error loading data:', error);
-        });
+        const chartDataUrl = "{% url 'chart_data' %}"; 
     </script>
+
 
 </body>
 </html>

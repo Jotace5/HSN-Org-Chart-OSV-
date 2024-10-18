@@ -10,8 +10,7 @@ urlpatterns = [
     path('admin-view/', views.admin_view, name='admin_view'),  # Admin-only page
     path('viewer-view/', views.viewer_view, name='viewer_view'),  # Viewer-only page
     path('upload_excel/', views.upload_excel, name='upload_excel'),
-    path('chart_data/', views.get_chart_data, name='chart_data'), 
-    
+    path('chart_data/', views.get_chart_data, name='chart_data'),
     
     # Password reset views
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
