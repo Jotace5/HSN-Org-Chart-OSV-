@@ -1,0 +1,33 @@
+<!-- confirm_upload.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm Upload</title>
+</head>
+<body>
+    <h1>Confirm Data Upload</h1>
+    
+    <h2>Database Statistics</h2>
+    <ul>
+        {% for key, value in db_counts.items %}
+            <li>{{ key }}: {{ value }}</li>
+        {% endfor %}
+    </ul>
+    <p>Total rows in database: {{ total_db_rows }}</p>
+
+    <h2>New File Statistics</h2>
+    <ul>
+        {% for key, value in file_counts.items %}
+            <li>{{ key }}: {{ value }}</li>
+        {% endfor %}
+    </ul>
+    <p>Total rows in new file: {{ total_file_rows }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" name="confirm" value="accept">Accept Upload</button>
+        <a href="{% url 'dashboard' %}">Cancel</a>
+    </form>
+</body>
+</html>
