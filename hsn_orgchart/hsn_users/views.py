@@ -225,53 +225,85 @@ def extract_file_statistics(df_data_to_check):
 #----------------------------------------------------------------------------------------------------
 def process_and_upload_data(request, df_data_to_check, file_name):
     try:
+        # Initialize counters and stack to track the hierarchy
         id_counter = 100
         rows_processed = 0
-        last_id_per_column = {}
-        last_column_index = -1
+        hierarchy_stack = []  # Stack to maintain current hierarchy nodes
 
+        # Iterate over each row in the DataFrame
         for row_index in range(len(df_data_to_check)):
             parentId = None
+            print(f"Processing row {row_index}...")  # Debugging: Show which row is being processed
 
-            for col_index in range(7, -1, -1):
+            # Iterate over columns from A (index 0) to H (index 7)
+            for col_index in range(0, 8):
                 value = df_data_to_check.iloc[row_index, col_index]
                 if pd.notna(value):
+                    # Clean and prepare the data
                     officename = value.replace('"', '').replace(',', ' ')
                     official = df_data_to_check.iloc[row_index, 8] if pd.notna(df_data_to_check.iloc[row_index, 8]) else None
                     currentRegulations = df_data_to_check.iloc[row_index, 9] if pd.notna(df_data_to_check.iloc[row_index, 9]) else None
 
-                    parentId = calculate_parent_id(col_index, last_column_index, last_id_per_column)
+                    # Determine the parentId using the stack
+                    # If the stack is empty, it's a root node
+                    if len(hierarchy_stack) == 0:
+                        parentId = None
+                    else:
+                        # If the current column is the same level as the previous top of the stack, it is a sibling
+                        if len(hierarchy_stack) > col_index and hierarchy_stack[-1]['level'] == col_index:
+                            # Assign the same parent as the top of the stack
+                            parentId = hierarchy_stack[-1]['parentId']
+                        else:
+                            # Pop until the correct parent level is found
+                            while len(hierarchy_stack) > col_index:
+                                hierarchy_stack.pop()
+
+                            # If there's still something in the stack, that means it's the parent
+                            if len(hierarchy_stack) > 0:
+                                parentId = hierarchy_stack[-1]['id']
+                            else:
+                                parentId = None
+
+                    # Debugging output for each step to verify parentId determination
+                    print(f"Row {row_index}, Column {col_index}: Value = {value}")
+                    print(f"Processing: officename={officename}, official={official}, currentRegulations={currentRegulations}")
+                    print(f"Determined parentId: {parentId}")
 
                     # Save the data to the database
                     office, created = dataOffice.objects.update_or_create(
                         id=id_counter,
                         defaults={
                             'parentId': parentId,
-                            'hierarchies': chr(col_index + 65),
+                            'hierarchies': chr(col_index + 65),  # Convert index to level (A, B, C...)
                             'officename': officename,
                             'currentRegulations': currentRegulations
                         }
                     )
 
+                    # Save the official if available
                     if official:
                         dataOfficial.objects.update_or_create(
                             office=office,
                             defaults={'name': official}
                         )
 
-                    last_id_per_column[col_index] = id_counter
-                    last_column_index = col_index
+                    # Update the hierarchy stack with the current node
+                    hierarchy_stack.append({'id': id_counter, 'level': col_index, 'parentId': parentId})
                     id_counter += 1
                     rows_processed += 1
-                    break
+                    print(f"Row processed successfully: {rows_processed} rows processed so far.")  # Debugging: Show progress
+                    break  # Exit the loop once the correct value is processed
 
         status = 'SUCCESS'
         error_message = ''
 
     except Exception as e:
+        # Handle exceptions during processing
         status = 'FAILED'
         error_message = str(e)
+        print(f"Error during upload process: {error_message}")  # Debugging: Show error message
 
+    # Log the upload status
     DataUploadLog.objects.create(
         user=request.user,
         upload_time=timezone.now(),
@@ -281,12 +313,21 @@ def process_and_upload_data(request, df_data_to_check, file_name):
         error_message=error_message
     )
 
+    # Send success or failure message to the user
     if status == 'SUCCESS':
+        print(f"Upload completed successfully: {rows_processed} rows processed.")  # Debugging: Confirm successful upload
         messages.success(request, f'Successfully uploaded {rows_processed} rows from {file_name}')
     else:
+        print(f"Upload failed: {error_message}")  # Debugging: Confirm failure
         messages.error(request, f'Failed to upload {file_name}: {error_message}')
 
-    return redirect('dashboard')  
+    return redirect('dashboard')
+
+
+
+
+
+ 
   
 #-------------------------------------------------------------------------------------------------------------
 @login_required
@@ -374,16 +415,16 @@ def confirm_upload(request):
      return redirect('dashboard')
 
 
-def calculate_parent_id(col_index, last_column_index, last_id_per_column):
-    parentId = None
-    if col_index > last_column_index:
-        parentId = last_id_per_column.get(last_column_index, None)
-    elif col_index == last_column_index:
-        for check_index in range(col_index - 1, -1, -1):
-            if check_index in last_id_per_column:
-                parentId = last_id_per_column[check_index]
-                break
-    return parentId
+#def calculate_parent_id(col_index, last_column_index, last_id_per_column):
+#    parentId = None
+#    if col_index > last_column_index:
+#        parentId = last_id_per_column.get(last_column_index, None)
+#    elif col_index == last_column_index:
+#        for check_index in range(col_index - 1, -1, -1):
+#            if check_index in last_id_per_column:
+#                parentId = last_id_per_column[check_index]
+#                break
+#    return parentId
     
 
 #------------------------------------------------------------------------------------------------------------------------------------------------
