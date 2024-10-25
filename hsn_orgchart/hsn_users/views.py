@@ -99,6 +99,7 @@ def viewer_view(request):
     return render(request, 'viewer_page.html')
 
 #-----------------------------------------------------------------------------------------------------------------
+# Data Extraction and Normalization
 # Dictionary to normalize hierarchy terms
 hierarchy_dict = {
     "honorable": "honorable",
@@ -165,6 +166,7 @@ def count_hierarchies(data):
             else:
                 counts[hierarchy_type] = 1
     return counts
+
 #----------------------------------------------------------------------------
 # Define the checker_file function
 def checker_file(uploaded_file):
@@ -186,12 +188,25 @@ def checker_file(uploaded_file):
 
     # Step 3: Check if there is data in the database
     existing_data = dataOffice.objects.exists()
-
+#---------------------------------------------------------ADD STEP
+# Luego de normalizar los datos (usando el diccionario de jerarquias)
+# Chequear si las primera palabra y la segunda (si 2da=General) corresponde a cada columna en el dataset
+# B= Presidencia, Secretaria, Prosecretaria, etc
+# C= Direccion general
+# D= Subdireccion general
+# E= Direccion
+# F= Subdireccion
+# G= Departamento
+# H= Division 
+# Si no coinciden mostrar la primera palabra contrastada con la que deberia ser para que el usaurio cargue los datos
+#---------------------------------------------------------
     if existing_data:
         return df_data_to_check, "Comparison required"
     else:
         return df_data_to_check, "Direct upload"
-#-------------------------------------------------------------------------------------------------------------- 
+    
+    
+
 def extract_database_statistics():
     try:
         # Extract only the relevant fields (excluding 'id' and 'parentId')
@@ -223,77 +238,121 @@ def extract_file_statistics(df_data_to_check):
     return file_counts, total_file_rows  
   
 #----------------------------------------------------------------------------------------------------
+class TreeNode:
+    def __init__(self, name, level, official=None, current_regulations=None):
+        self.name = name
+        self.level = level  # Represents the column level (A, B, C, etc.)
+        self.children = []
+        self.parent = None
+        self.official = official
+        self.currentRegulations = current_regulations
+        self.id = None  # To be assigned when saving to the database
+
+    def add_child(self, child_node):
+        child_node.parent = self
+        self.children.append(child_node)
+
+def build_tree(df_data_to_check):
+    # Initialize root node once
+    root = TreeNode(name="Honorable Senado de la Nacion", level='A')
+    node_map = {'A': root}  # Dictionary to keep track of nodes per level
+
+    # Iterate over each row of the DataFrame
+    for row_index in range(len(df_data_to_check)):
+        for col_index in range(8):  # Columns A to H (0-7)
+            value = df_data_to_check.iloc[row_index, col_index]
+
+            if pd.notna(value):
+                # Skip creating a new node for the root node again
+                if col_index == 0 and value == "Honorable Senado de la Nacion":
+                    continue  # Root node is already created
+
+                # Clean and prepare the data
+                node_name = value.replace('"', '').replace(',', ' ')
+                official = df_data_to_check.iloc[row_index, 8] if pd.notna(df_data_to_check.iloc[row_index, 8]) else None
+                current_regulations = df_data_to_check.iloc[row_index, 9] if pd.notna(df_data_to_check.iloc[row_index, 9]) else None
+
+                # Create the new node for the current value
+                new_node = TreeNode(name=node_name, level=chr(col_index + 65), official=official, current_regulations=current_regulations)
+
+                # Determine the appropriate parent
+                if col_index == 0:
+                    # If it's column A, it's the root and has no parent
+                    parent_node = None
+                else:
+                    # Check previous columns for the appropriate parent
+                    parent_node = None
+                    for prev_col in range(col_index - 1, -1, -1):
+                        if chr(prev_col + 65) in node_map:
+                            parent_node = node_map[chr(prev_col + 65)]
+                            break
+
+                # If we found a parent, add the new node as a child of that parent
+                if parent_node:
+                    parent_node.add_child(new_node)
+                else:
+                    # If no valid parent found, add as a child of the root
+                    root.add_child(new_node)
+
+                # Update the node_map with the new node for the current level
+                node_map[chr(col_index + 65)] = new_node
+
+    return root
+
+def save_tree_to_db(root):
+    id_counter = 100  # Initial ID for nodes
+    rows_processed = 0  # Counter to track rows processed
+
+    def save_node(node, parent_id=None):
+        nonlocal id_counter, rows_processed
+
+        # Save the node to the database
+        office, created = dataOffice.objects.update_or_create(
+            id=id_counter,
+            defaults={
+                'parentId': parent_id,
+                'hierarchies': node.level,
+                'officename': node.name,
+                'currentRegulations': node.currentRegulations
+            }
+        )
+
+        # Save the official if available
+        if node.official:
+            dataOfficial.objects.update_or_create(
+                office=office,
+                defaults={'name': node.official}
+            )
+
+        # Log node details for debugging
+        print(f"Node saved: ID={id_counter}, Name={node.name}, ParentID={parent_id}, Level={node.level}")
+
+        # Assign the current ID to the node and increment the counter
+        node.id = id_counter
+        id_counter += 1
+        rows_processed += 1
+
+        # Recursively save all children
+        for child in node.children:
+            save_node(child, parent_id=node.id)
+
+    # Start saving from the root
+    save_node(root)
+
+    # Return the number of rows processed to log it later
+    return rows_processed
+
 def process_and_upload_data(request, df_data_to_check, file_name):
     try:
-        # Initialize counters and stack to track the hierarchy
-        id_counter = 100
-        rows_processed = 0
-        hierarchy_stack = []  # Stack to maintain current hierarchy nodes
+        # Step 1: Build the tree from the DataFrame
+        print("Building the tree structure from the data...")
+        root = build_tree(df_data_to_check)
 
-        # Iterate over each row in the DataFrame
-        for row_index in range(len(df_data_to_check)):
-            parentId = None
-            print(f"Processing row {row_index}...")  # Debugging: Show which row is being processed
+        # Step 2: Save the tree to the database
+        print("Saving the tree structure to the database...")
+        rows_processed = save_tree_to_db(root)
 
-            # Iterate over columns from A (index 0) to H (index 7)
-            for col_index in range(0, 8):
-                value = df_data_to_check.iloc[row_index, col_index]
-                if pd.notna(value):
-                    # Clean and prepare the data
-                    officename = value.replace('"', '').replace(',', ' ')
-                    official = df_data_to_check.iloc[row_index, 8] if pd.notna(df_data_to_check.iloc[row_index, 8]) else None
-                    currentRegulations = df_data_to_check.iloc[row_index, 9] if pd.notna(df_data_to_check.iloc[row_index, 9]) else None
-
-                    # Determine the parentId using the stack
-                    # If the stack is empty, it's a root node
-                    if len(hierarchy_stack) == 0:
-                        parentId = None
-                    else:
-                        # If the current column is the same level as the previous top of the stack, it is a sibling
-                        if len(hierarchy_stack) > col_index and hierarchy_stack[-1]['level'] == col_index:
-                            # Assign the same parent as the top of the stack
-                            parentId = hierarchy_stack[-1]['parentId']
-                        else:
-                            # Pop until the correct parent level is found
-                            while len(hierarchy_stack) > col_index:
-                                hierarchy_stack.pop()
-
-                            # If there's still something in the stack, that means it's the parent
-                            if len(hierarchy_stack) > 0:
-                                parentId = hierarchy_stack[-1]['id']
-                            else:
-                                parentId = None
-
-                    # Debugging output for each step to verify parentId determination
-                    print(f"Row {row_index}, Column {col_index}: Value = {value}")
-                    print(f"Processing: officename={officename}, official={official}, currentRegulations={currentRegulations}")
-                    print(f"Determined parentId: {parentId}")
-
-                    # Save the data to the database
-                    office, created = dataOffice.objects.update_or_create(
-                        id=id_counter,
-                        defaults={
-                            'parentId': parentId,
-                            'hierarchies': chr(col_index + 65),  # Convert index to level (A, B, C...)
-                            'officename': officename,
-                            'currentRegulations': currentRegulations
-                        }
-                    )
-
-                    # Save the official if available
-                    if official:
-                        dataOfficial.objects.update_or_create(
-                            office=office,
-                            defaults={'name': official}
-                        )
-
-                    # Update the hierarchy stack with the current node
-                    hierarchy_stack.append({'id': id_counter, 'level': col_index, 'parentId': parentId})
-                    id_counter += 1
-                    rows_processed += 1
-                    print(f"Row processed successfully: {rows_processed} rows processed so far.")  # Debugging: Show progress
-                    break  # Exit the loop once the correct value is processed
-
+        # If everything goes well
         status = 'SUCCESS'
         error_message = ''
 
@@ -301,7 +360,8 @@ def process_and_upload_data(request, df_data_to_check, file_name):
         # Handle exceptions during processing
         status = 'FAILED'
         error_message = str(e)
-        print(f"Error during upload process: {error_message}")  # Debugging: Show error message
+        print(f"Error during upload process: {error_message}")
+        rows_processed = 0
 
     # Log the upload status
     DataUploadLog.objects.create(
@@ -315,19 +375,22 @@ def process_and_upload_data(request, df_data_to_check, file_name):
 
     # Send success or failure message to the user
     if status == 'SUCCESS':
-        print(f"Upload completed successfully: {rows_processed} rows processed.")  # Debugging: Confirm successful upload
-        messages.success(request, f'Successfully uploaded {rows_processed} rows from {file_name}')
+        print(f"Upload completed successfully: {rows_processed} nodes processed.")
+        messages.success(request, f'Successfully uploaded {rows_processed} nodes from {file_name}')
+
+        # Cleanup temporary file after successful upload
+        temp_file_path = request.session.get('temp_file_path')
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+            print(f"Temporary file '{temp_file_path}' has been removed.")
+    
     else:
-        print(f"Upload failed: {error_message}")  # Debugging: Confirm failure
+        print(f"Upload failed: {error_message}")
         messages.error(request, f'Failed to upload {file_name}: {error_message}')
 
     return redirect('dashboard')
 
 
-
-
-
- 
   
 #-------------------------------------------------------------------------------------------------------------
 @login_required
@@ -343,11 +406,11 @@ def upload_excel(request):
                 return redirect('dashboard')
 
             if status == "Comparison required":
-                # Extract statistics from both the database and the new file
+                # Comparison flow stays the same
                 db_counts, total_db_rows = extract_database_statistics()
                 file_counts, total_file_rows = extract_file_statistics(df_data_to_check)
-
-                # Prepare context for rendering the comparison page
+                
+                # Render comparison page
                 context = {
                     'db_counts': db_counts,
                     'total_db_rows': total_db_rows,
@@ -355,26 +418,23 @@ def upload_excel(request):
                     'total_file_rows': total_file_rows,
                     'uploaded_file_name': uploaded_file.name,
                 }
-
-                 # Save the uploaded file to a temporary location
+                
+                # Save the uploaded file to a temporary location for later use
                 temp_dir = tempfile.gettempdir()
                 temp_file_path = os.path.join(temp_dir, uploaded_file.name)
                 
                 with open(temp_file_path, 'wb') as temp_file:
                     for chunk in uploaded_file.chunks():
                         temp_file.write(chunk)
-
-                # Store the temporary file path and file extension in the session
-                _, file_extension = os.path.splitext(uploaded_file.name)
+                
                 request.session['temp_file_path'] = temp_file_path
                 request.session['file_name'] = uploaded_file.name
-                request.session['file_extension'] = file_extension
+                request.session['file_extension'] = os.path.splitext(uploaded_file.name)[1]
 
-                # Show comparison page
                 return render(request, 'hsn_users/confirm_upload.html', context)
 
             elif status == "Direct upload":
-                # Directly proceed to upload if no comparison is required
+                # Proceed with the tree construction and data upload
                 return process_and_upload_data(request, df_data_to_check, uploaded_file.name)
 
     return render(request, 'hsn_users/admin_dashboard.html')
@@ -413,19 +473,7 @@ def confirm_upload(request):
             return redirect('dashboard')
 
      return redirect('dashboard')
-
-
-#def calculate_parent_id(col_index, last_column_index, last_id_per_column):
-#    parentId = None
-#    if col_index > last_column_index:
-#        parentId = last_id_per_column.get(last_column_index, None)
-#    elif col_index == last_column_index:
-#        for check_index in range(col_index - 1, -1, -1):
-#            if check_index in last_id_per_column:
-#                parentId = last_id_per_column[check_index]
-#                break
-#    return parentId
-    
+ 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------
 @login_required
