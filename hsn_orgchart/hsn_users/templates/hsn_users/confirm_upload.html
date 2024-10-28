@@ -1,33 +1,143 @@
-<!-- confirm_upload.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
-    <title>Confirm Upload</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Upload - Comparative View</title>
+    <link rel="stylesheet" href="{% static 'hsn_users/styles.css' %}">
 </head>
 <body>
-    <h1>Confirm Data Upload</h1>
-    
-    <h2>Database Statistics</h2>
-    <ul>
-        {% for key, value in db_counts.items %}
-            <li>{{ key }}: {{ value }}</li>
-        {% endfor %}
-    </ul>
-    <p>Total rows in database: {{ total_db_rows }}</p>
+    <div class="container">
+        <h1>Confirm Data Upload</h1>
+        <p>Please review the comparison between the uploaded data and the existing database records before proceeding.</p>
 
-    <h2>New File Statistics</h2>
-    <ul>
-        {% for key, value in file_counts.items %}
-            <li>{{ key }}: {{ value }}</li>
-        {% endfor %}
-    </ul>
-    <p>Total rows in new file: {{ total_file_rows }}</p>
+        <!-- Comparative Total Rows Section -->
+        <div class="summary-section">
+            <h2>Comparative Total Rows</h2>
+            <div class="total-rows">
+                <p><strong>Total Rows in Database:</strong> {{ total_db_rows }}</p>
+                <p><strong>Total Rows in Uploaded File:</strong> {{ total_file_rows }}</p>
+            </div>
+        </div>
 
-    <form method="POST">
-        {% csrf_token %}
-        <button type="submit" name="confirm" value="accept">Accept Upload</button>
-        <a href="{% url 'dashboard' %}">Cancel</a>
-    </form>
+        <!-- Category Comparison Section -->
+        <div class="category-comparison-section">
+            <h2>Category Quantity Comparison</h2>
+            <table class="category-table">
+                <thead>
+                    <tr>
+                        <th>Hierarchy Type</th>
+                        <th>Database Count</th>
+                        <th>Uploaded File Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hierarchy_type, db_count in db_counts.items %}
+                        <tr>
+                            <td>{{ hierarchy_type }}</td>
+                            <td>{{ db_count }}</td>
+                            <td>
+                                {% with hierarchy_type|lower as normalized_hierarchy %}
+                                    {% if normalized_hierarchy in file_counts %}
+                                        {{ file_counts[normalized_hierarchy] }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- New Records Section -->
+        <div class="new-records-section">
+            <h2>New Records in Uploaded File</h2>
+            <button onclick="toggleVisibility('new-records-table')" class="toggle-button">Toggle View</button>
+            <div id="new-records-table" class="table-container">
+                {% if new_records %}
+                    <table class="differences-table">
+                        <thead>
+                            <tr>
+                                <th>Officename</th>
+                                <th>Hierarchies</th>
+                                <th>Current Regulations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in new_records if record.officename and not record.officename == 'nan' %}
+                                <tr>
+                                    <td>{{ record.officename }}</td>
+                                    <td>{{ record.hierarchies }}</td>
+                                    <td>{{ record.currentRegulations }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No new records found in the uploaded file.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Missing Records Section -->
+        <div class="missing-records-section">
+            <h2>Missing Records in Database</h2>
+            <button onclick="toggleVisibility('missing-records-table')" class="toggle-button">Toggle View</button>
+            <div id="missing-records-table" class="table-container">
+                {% if missing_records %}
+                    <table class="differences-table">
+                        <thead>
+                            <tr>
+                                <th>Officename</th>
+                                <th>Hierarchies</th>
+                                <th>Current Regulations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in missing_records %}
+                                <tr>
+                                    <td>{{ record.officename }}</td>
+                                    <td>{{ record.hierarchies }}</td>
+                                    <td>{{ record.currentRegulations }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No missing records in the database.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="actions-section">
+            <form method="post" action="{% url 'confirm_upload' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Confirm and Upload</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+            <div class="log-summary">
+                <p><strong>Summary Log:</strong> Please confirm if you are ready to proceed with uploading new records and updating the existing database.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Toggling Visibility -->
+    <script>
+        function toggleVisibility(tableId) {
+            var tableContainer = document.getElementById(tableId);
+            if (tableContainer.style.display === "none") {
+                tableContainer.style.display = "block";
+            } else {
+                tableContainer.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
+
+
+

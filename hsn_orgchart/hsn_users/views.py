@@ -5,7 +5,6 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib import messages
 from django.core.files.storage import default_storage
 import os
 import pandas as pd
@@ -17,6 +16,8 @@ import logging
 import re
 import sqlite3
 import tempfile
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import filetype
 
 logger = logging.getLogger(__name__) 
 
@@ -133,109 +134,210 @@ hierarchy_dict = {
 
 # Function to determine the type of hierarchy based on the first words
 def get_hierarchy_type(text):
-    if pd.isna(text):
+    try:
+        if pd.isna(text):
+            return None
+
+        # Convert text to lowercase if it is a string
+        if isinstance(text, str):
+            words = text.lower().split()
+        else:
+            return None
+
+        if len(words) == 0:
+            return None
+
+        # Extract either the first word or the first two words if it's "general" or "gral"
+        if len(words) > 1 and (words[1] == "general" or words[1] == "gral"):
+            hierarchy_type = f"{words[0]} {words[1]}"
+        else:
+            hierarchy_type = words[0]
+
+        # Normalize using the hierarchy dictionary to handle similar terms or typos
+        return hierarchy_dict.get(hierarchy_type, hierarchy_type)
+    except Exception as e:
+        logger.error(f"Error in get_hierarchy_type: {str(e)}")
         return None
-
-    # Convert text to lowercase if it is a string
-    if isinstance(text, str):
-        words = text.lower().split()
-    else:
-        return None
-
-    if len(words) == 0:
-        return None
-
-    # Extract either the first word or the first two words if it's "general" or "gral"
-    if len(words) > 1 and (words[1] == "general" or words[1] == "gral"):
-        hierarchy_type = f"{words[0]} {words[1]}"
-    else:
-        hierarchy_type = words[0]
-
-    # Normalize using the hierarchy dictionary to handle similar terms or typos
-    return hierarchy_dict.get(hierarchy_type, hierarchy_type)
 
 # Function to count the number of hierarchies by type
 def count_hierarchies(data):
     counts = {}
-    for value in data:
-        # Use get_hierarchy_type() to get the standardized hierarchy type
-        hierarchy_type = get_hierarchy_type(value)
-        if hierarchy_type:
-            if hierarchy_type in counts:
-                counts[hierarchy_type] += 1
-            else:
-                counts[hierarchy_type] = 1
+    try:
+        for value in data:
+            hierarchy_type = get_hierarchy_type(value)
+            if hierarchy_type:
+                counts[hierarchy_type] = counts.get(hierarchy_type, 0) + 1
+    except Exception as e:
+        logger.error(f"Error in count_hierarchies: {str(e)}")
     return counts
 
-#----------------------------------------------------------------------------
-# Define the checker_file function
-def checker_file(uploaded_file):
-    check_messages = []
-
-    # Step 1: Determine the file extension
-    _, file_extension = os.path.splitext(uploaded_file.name)
-    if file_extension not in ['.xls', '.xlsx']:
-        return None, "Error: Unsupported file type. Please upload an .xls or .xlsx file."
-
-    # Step 2: Load the Excel file
+# Function to validate and read Excel file
+def read_excel_file(uploaded_file):
     try:
+        # Validate file type using filetype (more Windows-friendly)
+        uploaded_file.seek(0)
+        kind = filetype.guess(uploaded_file.read(1024))
+        uploaded_file.seek(0)
+
+        if kind is None or kind.mime not in ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']:
+            raise ValueError("Unsupported file type. Please upload a valid Excel file.")
+
+        _, file_extension = os.path.splitext(uploaded_file.name)
         if file_extension == '.xls':
-            df_data_to_check = pd.read_excel(uploaded_file, engine='xlrd')
+            df = pd.read_excel(uploaded_file, engine='xlrd', header=None)
         elif file_extension == '.xlsx':
-            df_data_to_check = pd.read_excel(uploaded_file, engine='openpyxl')
+            df = pd.read_excel(uploaded_file, engine='openpyxl', header=None)
+
+        # Generate dynamic column names based on the number of columns in the DataFrame
+        column_names = [f'col_{i}' for i in range(len(df.columns))]
+        column_names[0] = 'officename'  # Ensure the first column is named 'officename'
+        df.columns = column_names
+
+        # Normalize column names to lowercase to avoid case sensitivity issues
+        df.columns = df.columns.str.lower()
+        return df
     except Exception as e:
-        return None, f"Error: Could not load the file. Format differences: {str(e)}"
+        logger.error(f"Error reading Excel file: {str(e)}")
+        raise
 
-    # Step 3: Check if there is data in the database
-    existing_data = dataOffice.objects.exists()
-#---------------------------------------------------------ADD STEP
-# Luego de normalizar los datos (usando el diccionario de jerarquias)
-# Chequear si las primera palabra y la segunda (si 2da=General) corresponde a cada columna en el dataset
-# B= Presidencia, Secretaria, Prosecretaria, etc
-# C= Direccion general
-# D= Subdireccion general
-# E= Direccion
-# F= Subdireccion
-# G= Departamento
-# H= Division 
-# Si no coinciden mostrar la primera palabra contrastada con la que deberia ser para que el usaurio cargue los datos
-#---------------------------------------------------------
-    if existing_data:
-        return df_data_to_check, "Comparison required"
-    else:
-        return df_data_to_check, "Direct upload"
-    
-    
-
+# Function to extract statistics from the database
+# Extract the hierarchy type from the officename column
 def extract_database_statistics():
     try:
-        # Extract only the relevant fields (excluding 'id' and 'parentId')
-        data = list(dataOffice.objects.values_list('officename', 'hierarchies', 'currentRegulations'))
-
-        # Flatten the list and filter out None values
-        data = [item for sublist in data for item in sublist if item is not None]
-        
-        # Process each value to extract the hierarchy type (first word or first two words)
-        hierarchy_types = [get_hierarchy_type(value) for value in data]
-
-        # Count the occurrences of each hierarchy type
+        # Extract office names from the database
+        data = list(dataOffice.objects.values_list('officename', flat=True))
+        # Normalize each hierarchy using get_hierarchy_type (based on officename)
+        hierarchy_types = [get_hierarchy_type(value) for value in data if value is not None]
+        # Count occurrences of each hierarchy type
         db_counts = count_hierarchies(hierarchy_types)
-
-        # Count the total number of rows in the database with valid data
+        # Count the total number of rows in the database with valid office name data
         total_db_rows_with_data = dataOffice.objects.exclude(officename__isnull=True).count()
-        
         return db_counts, total_db_rows_with_data
-
     except Exception as e:
-        print(f"Error extracting database statistics: {str(e)}")
+        logger.error(f"Error extracting database statistics: {str(e)}")
         return {}, 0
 
+# Function to extract statistics from the uploaded file
+# Extract and count the values in the columns A to H from the Excel file
 def extract_file_statistics(df_data_to_check):
-    data_from_file = df_data_to_check.iloc[:, :8].values.flatten()
-    data_from_file = [item for item in data_from_file if pd.notna(item)]
-    file_counts = count_hierarchies(data_from_file)
-    total_file_rows = df_data_to_check.dropna(how='all').shape[0]
-    return file_counts, total_file_rows  
+    try:
+        # Print columns for debugging
+        print(f"Columns in uploaded file: {df_data_to_check.columns}")
+
+        # Check if 'officename' column exists
+        if 'officename' not in df_data_to_check.columns:
+            raise ValueError("The uploaded file must contain a column named 'officename'.")
+
+        # Extract data from columns A to H
+        data_from_file = df_data_to_check.iloc[:, :8].values.flatten()
+        # Filter out None and NaN values
+        data_from_file = [item for item in data_from_file if pd.notna(item)]
+        # Normalize each hierarchy using get_hierarchy_type
+        hierarchy_types = [get_hierarchy_type(value) for value in data_from_file]
+        # Count occurrences of each hierarchy type
+        file_counts = count_hierarchies(hierarchy_types)
+        # Count the total number of rows in the DataFrame with valid data in columns A to H
+        total_file_rows = df_data_to_check.dropna(how='all', subset=df_data_to_check.columns[:8]).shape[0]
+        return file_counts, total_file_rows
+    except Exception as e:
+        logger.error(f"Error extracting file statistics: {str(e)}")
+        raise
+
+# Function to compare data between uploaded file and database
+def compare_data(df_data_to_check, db_data):
+    new_records = []
+    updated_records = []
+    missing_records = []
+
+    # Convert database data to DataFrame for easy comparison
+    db_df = pd.DataFrame(db_data, columns=['officename', 'hierarchies', 'currentRegulations'])
+
+    # Identify new and updated records
+    for _, row in df_data_to_check.iterrows():
+        matching_rows = db_df[db_df['officename'] == row['officename']]
+        if matching_rows.empty:
+            new_records.append(row)
+        else:
+            # Check if any fields are different
+            db_row = matching_rows.iloc[0]
+            if not row.equals(db_row):
+                updated_records.append({'existing': db_row, 'updated': row})
+
+    # Identify missing records
+    for _, row in db_df.iterrows():
+        if row['officename'] not in df_data_to_check['officename'].values:
+            missing_records.append(row)
+
+    return new_records, updated_records, missing_records
+
+@login_required
+@user_passes_test(is_admin)
+def upload_excel(request):
+    if request.method == 'POST':
+        if 'file' in request.FILES:
+            uploaded_file = request.FILES['file']
+            try:
+                # Read the uploaded Excel file
+                df_data_to_check = read_excel_file(uploaded_file)
+                # Check if there is existing data in the database
+                existing_data = dataOffice.objects.exists()
+                if existing_data:
+                    # Extract statistics from the database
+                    db_counts, total_db_rows = extract_database_statistics()
+                    # Extract statistics from the uploaded file
+                    file_counts, total_file_rows = extract_file_statistics(df_data_to_check)
+
+                    # Extract relevant data from the database for comparison
+                    db_data = list(dataOffice.objects.values_list('officename', 'hierarchies', 'currentRegulations'))
+                    # Compare uploaded data with existing database data
+                    new_records, updated_records, missing_records = compare_data(df_data_to_check, db_data)
+
+                    # Render comparison page with granular data
+                    context = {
+                        'db_counts': db_counts,  # Count of hierarchy types in the database
+                        'total_db_rows': total_db_rows,  # Total rows in the database with valid data
+                        'file_counts': file_counts,  # Count of hierarchy types in the uploaded file
+                        'total_file_rows': total_file_rows,  # Total rows in the uploaded file with valid data
+                        'uploaded_file_name': uploaded_file.name,  # Name of the uploaded file
+                        'new_records': new_records,  # Records present in the file but not in the database
+                        'updated_records': updated_records,  # Records that have differences compared to the database
+                        'missing_records': missing_records  # Records present in the database but missing from the file
+                    }
+
+                    # Store DataFrame and file name in session for future reference
+                    request.session['df_data_to_check'] = df_data_to_check.to_dict()
+                    request.session['file_name'] = uploaded_file.name
+                    return render(request, 'hsn_users/confirm_upload.html', context)
+                else:
+                    # Direct upload if there is no existing data
+                    return upload_data(request, df_data_to_check, uploaded_file.name)
+            except ValueError as e:
+                # Handle value errors (e.g., unsupported file type)
+                messages.error(request, str(e))
+                logger.error(f"Upload failed: {str(e)}")
+            except Exception as e:
+                # Handle unexpected errors
+                messages.error(request, f"Unexpected error: {str(e)}")
+                logger.error(f"Upload failed: {str(e)}")
+    return render(request, 'hsn_users/admin_dashboard.html')
+
+@login_required
+@user_passes_test(is_admin)
+def confirm_upload(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve DataFrame from session
+            df_data_to_check = pd.DataFrame.from_dict(request.session.get('df_data_to_check'))
+            file_name = request.session.get('file_name')
+
+            # Proceed to upload data to the database
+            return upload_data(request, df_data_to_check, file_name)
+        except Exception as e:
+            # Handle errors during confirmation
+            messages.error(request, f"Error confirming upload: {str(e)}")
+            logger.error(f"Error in confirm_upload: {str(e)}")
+    return redirect('dashboard')
+
   
 #----------------------------------------------------------------------------------------------------
 class TreeNode:
@@ -342,7 +444,7 @@ def save_tree_to_db(root):
     # Return the number of rows processed to log it later
     return rows_processed
 
-def process_and_upload_data(request, df_data_to_check, file_name):
+def upload_data(request, df_data_to_check, file_name):
     try:
         # Step 1: Build the tree from the DataFrame
         print("Building the tree structure from the data...")
@@ -389,91 +491,6 @@ def process_and_upload_data(request, df_data_to_check, file_name):
         messages.error(request, f'Failed to upload {file_name}: {error_message}')
 
     return redirect('dashboard')
-
-
-  
-#-------------------------------------------------------------------------------------------------------------
-@login_required
-@user_passes_test(is_admin)
-def upload_excel(request):
-    if request.method == 'POST':
-        if 'file' in request.FILES:
-            uploaded_file = request.FILES['file']
-            df_data_to_check, status = checker_file(uploaded_file)
-
-            if status.startswith("Error"):
-                messages.error(request, status)
-                return redirect('dashboard')
-
-            if status == "Comparison required":
-                # Comparison flow stays the same
-                db_counts, total_db_rows = extract_database_statistics()
-                file_counts, total_file_rows = extract_file_statistics(df_data_to_check)
-                
-                # Render comparison page
-                context = {
-                    'db_counts': db_counts,
-                    'total_db_rows': total_db_rows,
-                    'file_counts': file_counts,
-                    'total_file_rows': total_file_rows,
-                    'uploaded_file_name': uploaded_file.name,
-                }
-                
-                # Save the uploaded file to a temporary location for later use
-                temp_dir = tempfile.gettempdir()
-                temp_file_path = os.path.join(temp_dir, uploaded_file.name)
-                
-                with open(temp_file_path, 'wb') as temp_file:
-                    for chunk in uploaded_file.chunks():
-                        temp_file.write(chunk)
-                
-                request.session['temp_file_path'] = temp_file_path
-                request.session['file_name'] = uploaded_file.name
-                request.session['file_extension'] = os.path.splitext(uploaded_file.name)[1]
-
-                return render(request, 'hsn_users/confirm_upload.html', context)
-
-            elif status == "Direct upload":
-                # Proceed with the tree construction and data upload
-                return process_and_upload_data(request, df_data_to_check, uploaded_file.name)
-
-    return render(request, 'hsn_users/admin_dashboard.html')
-
-
-@login_required
-@user_passes_test(is_admin)
-def confirm_upload(request):
-     if request.method == 'POST':
-        # Retrieve the temporary file path, file extension, and file name from the session
-        temp_file_path = request.session.get('temp_file_path')
-        file_name = request.session.get('file_name')
-        file_extension = request.session.get('file_extension')
-
-        if not temp_file_path or not file_name or not os.path.exists(temp_file_path):
-            messages.error(request, 'No uploaded file found or file is missing. Please try again.')
-            return redirect('dashboard')
-
-        # Load the file from the temporary location into a DataFrame using the correct engine
-        try:
-            if file_extension == '.xls':
-                # Load the file using xlrd engine
-                df_data_to_check = pd.read_excel(temp_file_path, engine='xlrd')
-            elif file_extension == '.xlsx':
-                # Load the file using openpyxl engine
-                df_data_to_check = pd.read_excel(temp_file_path, engine='openpyxl')
-            else:
-                messages.error(request, 'Unsupported file type. Please upload a valid Excel file.')
-                return redirect('dashboard')
-
-            # Proceed to upload
-            return process_and_upload_data(request, df_data_to_check, file_name)
-
-        except Exception as e:
-            messages.error(request, f'Error reading file: {str(e)}')
-            return redirect('dashboard')
-
-     return redirect('dashboard')
- 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------
 @login_required

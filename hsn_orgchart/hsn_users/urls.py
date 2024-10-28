@@ -12,6 +12,7 @@ urlpatterns = [
     path('upload_excel/', views.upload_excel, name='upload_excel'),
     path('chart_data/', views.get_chart_data, name='chart_data'),
     path('approve-update/', views.approve_update, name='approve_update'),
+    path('confirm_upload/', views.confirm_upload, name='confirm_upload'),
     
     # Password reset views
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
