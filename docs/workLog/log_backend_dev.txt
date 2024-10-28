@@ -38,8 +38,7 @@ Implementation Plan:
    -In Development:
       !) LOAD DATABASE logic adds a layer of validation to prevent unintended changes.
             -Pre-upload Comparison Step
-            -User Decision Interface
-            
+            -User Decision Interface  
          1) [Admin][Animation]            Show time to load data / Animation of loading
          2) [Admin]                       Automatically delete the XLS files used to upload data to the database.
          3) [Admin][Animation]            Msj Advice: Data loaded (Excel files)
