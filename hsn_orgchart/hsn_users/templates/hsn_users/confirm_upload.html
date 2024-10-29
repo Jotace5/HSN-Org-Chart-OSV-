@@ -33,18 +33,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for hierarchy_type, db_count in db_counts.items %}
+                    {% for hierarchy_type, db_count, file_count in comparison_data %}
                         <tr>
                             <td>{{ hierarchy_type }}</td>
                             <td>{{ db_count }}</td>
-                            <td>
-                                {% with hierarchy_type|lower as normalized_hierarchy %}
-                                    {% if normalized_hierarchy in file_counts %}
-                                        {{ file_counts[normalized_hierarchy] }}
-                                    {% else %}
-                                        0
-                                    {% endif %}
-                                {% endwith %}
+                            <td class="{% if db_count != file_count %}highlight{% endif %}">
+                                {{ file_count }}
                             </td>
                         </tr>
                     {% endfor %}
@@ -67,7 +61,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for record in new_records if record.officename and not record.officename == 'nan' %}
+                            {% for record in new_records %}
                                 <tr>
                                     <td>{{ record.officename }}</td>
                                     <td>{{ record.hierarchies }}</td>

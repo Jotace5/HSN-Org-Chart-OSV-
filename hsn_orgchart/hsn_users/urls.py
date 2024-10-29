@@ -1,7 +1,9 @@
-from django.urls import path
+from django.urls import include, path
+from django.conf import settings
+from . import views  # Import your views
 from django.contrib.auth import views as auth_views
-from . import views  # This imports your app's views.py
 
+# Main URL patterns
 urlpatterns = [
     path('', views.home, name='home'),  # Existing home view
     path('login/', views.custom_login_view, name='login'),  # Custom login page
@@ -20,3 +22,10 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]
+
+# Include the Django Debug Toolbar URLs if the DEBUG setting is True
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ]

@@ -221,9 +221,6 @@ def extract_database_statistics():
 # Extract and count the values in the columns A to H from the Excel file
 def extract_file_statistics(df_data_to_check):
     try:
-        # Print columns for debugging
-        print(f"Columns in uploaded file: {df_data_to_check.columns}")
-
         # Check if 'officename' column exists
         if 'officename' not in df_data_to_check.columns:
             raise ValueError("The uploaded file must contain a column named 'officename'.")
@@ -292,14 +289,23 @@ def upload_excel(request):
                     # Compare uploaded data with existing database data
                     new_records, updated_records, missing_records = compare_data(df_data_to_check, db_data)
 
+                    # Prepare comparison data to avoid template dictionary lookups
+                    comparison_data = []
+                    for hierarchy_type, db_count in db_counts.items():
+                        normalized_hierarchy = hierarchy_type.lower()
+                        file_count = file_counts.get(normalized_hierarchy, 0)
+                        comparison_data.append((hierarchy_type, db_count, file_count))
+
+                    # Filter new_records to remove any 'nan' or None officenames
+                    filtered_new_records = [record for record in new_records if record['officename'] and record['officename'] != 'nan']
+
                     # Render comparison page with granular data
                     context = {
-                        'db_counts': db_counts,  # Count of hierarchy types in the database
+                        'comparison_data': comparison_data,  # Simplified comparison data
                         'total_db_rows': total_db_rows,  # Total rows in the database with valid data
-                        'file_counts': file_counts,  # Count of hierarchy types in the uploaded file
                         'total_file_rows': total_file_rows,  # Total rows in the uploaded file with valid data
                         'uploaded_file_name': uploaded_file.name,  # Name of the uploaded file
-                        'new_records': new_records,  # Records present in the file but not in the database
+                        'new_records': filtered_new_records,  # Filtered new records
                         'updated_records': updated_records,  # Records that have differences compared to the database
                         'missing_records': missing_records  # Records present in the database but missing from the file
                     }
