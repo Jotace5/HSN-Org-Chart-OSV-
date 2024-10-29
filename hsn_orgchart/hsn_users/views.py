@@ -112,8 +112,8 @@ hierarchy_dict = {
     "observatorio": "Observatorio",
     "coord.": "Coordinación",
     "subdirección general": "Subdirección General",
-    "subirección general": "Wubdirección General",
-    "subdirección": "Wubdirección",
+    "subirección general": "Subdirección General",
+    "subdirección": "Subdirección",
     "dirección": "Dirección",
     "cuerpo": "Cuerpo",
     "oficina": "Oficina",
@@ -124,7 +124,7 @@ hierarchy_dict = {
     "subcoord. general": "Subcoordinación General",
     "subdireción": "Subdirección",
     "departamento": "Departamento",
-    "unidad": "Unidad",s
+    "unidad": "Unidad",
     "dpto.": "Departamento",
     "depto.": "Departamento",
     "depto": "Departamento",
@@ -246,26 +246,33 @@ def compare_data(df_data_to_check, db_data):
     updated_records = []
     missing_records = []
 
-    # Convert database data to DataFrame for easy comparison
+    # Extract the office names from the uploaded file using the existing function
+    file_counts, total_file_rows = extract_file_statistics(df_data_to_check)
+    office_names_in_file = file_counts.keys()
+
+    # Extract office names from the database
     db_df = pd.DataFrame(db_data, columns=['officename', 'hierarchies', 'currentRegulations'])
+    office_names_in_db = db_df['officename'].tolist()
 
     # Identify new and updated records
-    for _, row in df_data_to_check.iterrows():
-        matching_rows = db_df[db_df['officename'] == row['officename']]
-        if matching_rows.empty:
-            new_records.append(row)
+    for office_name in office_names_in_file:
+        if office_name not in office_names_in_db:
+            # If the office name is not found in the database, it's a new record
+            new_records.append({'officename': office_name})
         else:
-            # Check if any fields are different
+            # Find the matching row in the database and add it to updated records
+            matching_rows = db_df[db_df['officename'] == office_name]
             db_row = matching_rows.iloc[0]
-            if not row.equals(db_row):
-                updated_records.append({'existing': db_row, 'updated': row})
+            updated_records.append({'existing': db_row, 'updated': office_name})
 
-    # Identify missing records
-    for _, row in db_df.iterrows():
-        if row['officename'] not in df_data_to_check['officename'].values:
-            missing_records.append(row)
+    # Identify missing records (i.e., records in the database but not in the uploaded file)
+    for office_name in office_names_in_db:
+        if office_name not in office_names_in_file:
+            missing_record = db_df[db_df['officename'] == office_name].iloc[0]
+            missing_records.append(missing_record)
 
     return new_records, updated_records, missing_records
+
 
 @login_required
 @user_passes_test(is_admin)
