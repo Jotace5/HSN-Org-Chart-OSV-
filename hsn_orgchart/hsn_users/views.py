@@ -122,6 +122,7 @@ hierarchy_dict = {
     "subdireccion": "Subdirección",
     "subdir.": "Subdirección",
     "subcoord. general": "Subcoordinación General",
+    "subcoordinación general": "Subcoordinación General",
     "subdireción": "Subdirección",
     "departamento": "Departamento",
     "unidad": "Unidad",
@@ -304,15 +305,16 @@ def upload_excel(request):
                         comparison_data.append((hierarchy_type, db_count, file_count))
 
                     # Filter new_records to remove any 'nan' or None officenames
-                    filtered_new_records = [record for record in new_records if record['officename'] and record['officename'] != 'nan']
-
+                    # filtered_new_records = [record for record in new_records if record['officename'] and record['officename'] != 'nan']
+                    
+                                       
                     # Render comparison page with granular data
                     context = {
                         'comparison_data': comparison_data,  # Simplified comparison data
                         'total_db_rows': total_db_rows,  # Total rows in the database with valid data
                         'total_file_rows': total_file_rows,  # Total rows in the uploaded file with valid data
                         'uploaded_file_name': uploaded_file.name,  # Name of the uploaded file
-                        'new_records': filtered_new_records,  # Filtered new records
+                        'new_records': new_records,  # Filtered new records
                         'updated_records': updated_records,  # Records that have differences compared to the database
                         'missing_records': missing_records  # Records present in the database but missing from the file
                     }
@@ -320,6 +322,7 @@ def upload_excel(request):
                     # Store DataFrame and file name in session for future reference
                     request.session['df_data_to_check'] = df_data_to_check.to_dict()
                     request.session['file_name'] = uploaded_file.name
+                    
                     return render(request, 'hsn_users/confirm_upload.html', context)
                 else:
                     # Direct upload if there is no existing data
@@ -342,7 +345,7 @@ def confirm_upload(request):
             # Retrieve DataFrame from session
             df_data_to_check = pd.DataFrame.from_dict(request.session.get('df_data_to_check'))
             file_name = request.session.get('file_name')
-
+            logger.debug(f"Retrieved df_data_to_check from session: {df_data_to_check}")
             # Proceed to upload data to the database
             return upload_data(request, df_data_to_check, file_name)
         except Exception as e:
